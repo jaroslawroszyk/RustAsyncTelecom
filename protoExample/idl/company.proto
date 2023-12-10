@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package itf;
+
+enum CompanyCategory {
+    LEGAL = 0;
+    ILLEGAL = 1;    
+}
+
+message Company {
+    uint32 company_id = 1;
+    string name = 2;
+    oneof Result {
+        uint32 user_id = 3;
+        CompanyCategory code = 4;
+    }
+}
