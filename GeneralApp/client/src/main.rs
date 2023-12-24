@@ -1,4 +1,4 @@
-use async_zmq::{Context, Result, zmq};
+use async_zmq::{zmq, Context, Result};
 use tokio::time::Duration;
 
 async fn run_client() -> Result<()> {

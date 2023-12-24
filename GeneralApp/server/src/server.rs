@@ -1,7 +1,6 @@
-use std::net::TcpListener;
 use async_zmq::{zmq, Context, Result};
+use std::net::TcpListener;
 use tokio::time::Duration;
-
 
 const SERVER_PORT: &str = "5555";
 
@@ -17,7 +16,10 @@ impl Server {
             let context = Context::new();
             let socket_address = format!("tcp://127.0.0.1:{}", SERVER_PORT);
 
-            Ok(Server { context, socket_address })
+            Ok(Server {
+                context,
+                socket_address,
+            })
         } else {
             Err(async_zmq::Error::EADDRINUSE)
         }
@@ -37,6 +39,7 @@ impl Server {
     }
 }
 
+//For tests purposes
 impl Clone for Server {
     fn clone(&self) -> Self {
         Self {
@@ -75,7 +78,9 @@ mod tests {
 
         let context = Context::new();
         let subscriber = context.socket(zmq::SUB).unwrap();
-        subscriber.connect(&format!("tcp://127.0.0.1:{}", SERVER_PORT)).unwrap();
+        subscriber
+            .connect(&format!("tcp://127.0.0.1:{}", SERVER_PORT))
+            .unwrap();
         subscriber.set_subscribe(b"").unwrap();
 
         tokio::time::sleep(Duration::from_secs(2)).await;
@@ -86,31 +91,26 @@ mod tests {
 
         server_handle.abort();
     }
+
+    #[tokio::test]
+    async fn test_server_address_not_available() {
+        let _context = Context::new();
+        let _listener = TcpListener::bind(format!("127.0.0.1:{}", SERVER_PORT)).unwrap();
+        let result = Server::new().await;
+
+        match result {
+            Err(async_zmq::Error::EADDRINUSE) => {
+                dbg!("Expected EADDRINUSE, the port is in use");
+                assert!(true);
+            }
+            Ok(_) => {
+                dbg!("Unexpected success, the port should be in use");
+                assert!(false, "Expected EADDRINUSE, but got success");
+            }
+            Err(err) => {
+                dbg!("Unexpected error: {:?}", err);
+                assert!(false, "Unexpected error: {:?}", err);
+            }
+        }
+    }
 }
-
-/*
-
-
-
-// impl Server {
-//     pub async fn new() -> Result<Self> {
-//         let context = Context::new();
-//         let socket = context.socket(zmq::PUB)?;
-
-//         let bind_address = format!("tcp://127.0.0.1:{}", SERVER_PORT);
-//         socket.bind(&bind_address)?;
-
-//         Ok(Server { context, socket })
-//     }
-
-//     pub async fn run(&self) -> Result<()> {
-//         loop {
-//             let message = "Hello, world!";
-//             self.socket.send(message, 0)?;
-
-//             tokio::time::sleep(Duration::from_secs(1)).await;
-//         }
-//     }
-// }
-
-*/
