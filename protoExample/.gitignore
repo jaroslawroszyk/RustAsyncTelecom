@@ -1,6 +1,0 @@
-target/
-.vscode
-/target/
-generated/src/company.rs
-generated/src/mod.rs
-Cargo.lock

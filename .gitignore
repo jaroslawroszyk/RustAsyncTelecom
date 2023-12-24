@@ -3,3 +3,4 @@ zmqTest/target/
 Cargo.lock
 zmqTest/Cargo.lock
 exampleRust/
+PlayGround/
