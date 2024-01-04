@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 async_zmq = "0.4.0"
 tokio = { version = "1", features = ["full"] }
+protobuf = "3.2.0"
+generated = { path = "../generated" }

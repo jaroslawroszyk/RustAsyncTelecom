@@ -15,3 +15,14 @@ message Company {
         CompanyCategory code = 4;
     }
 }
+
+message AddUser {
+    uint32 user_id = 1;
+    string user_name = 2;
+}
+
+message SomeMsg {
+    oneof msgtype {
+        AddUser add_user = 1;
+    }
+}

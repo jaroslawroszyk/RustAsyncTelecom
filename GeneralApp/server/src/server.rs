@@ -1,8 +1,7 @@
 use async_zmq::{zmq, Context, Result};
-use std::net::TcpListener;
-use tokio::time::Duration;
+use tokio::{net::TcpListener, time::Duration};
 
-const SERVER_PORT: &str = "5555";
+const SERVER_PORT: &str = "5556";
 
 #[allow(dead_code)]
 pub struct Server {
@@ -12,7 +11,7 @@ pub struct Server {
 
 impl Server {
     pub async fn new() -> Result<Self> {
-        if is_port_available(SERVER_PORT) {
+        if is_port_available(SERVER_PORT).await {
             let context = Context::new();
             let socket_address = format!("tcp://127.0.0.1:{}", SERVER_PORT);
 
@@ -26,20 +25,51 @@ impl Server {
     }
 
     pub async fn run(&self) -> Result<()> {
-        let socket = self.context.socket(zmq::PUB)?;
+        let sub_socket = self.context.socket(zmq::SUB)?;
+        sub_socket.bind(&self.socket_address)?;
+        sub_socket.set_subscribe(b"")?;
 
-        socket.bind(&self.socket_address)?;
+        println!("Server is running and waiting for messages...");
 
         loop {
-            let message = "Hello, world!";
-            socket.send(message, 0)?;
+            let message: Vec<u8> = read_message(&sub_socket).await?;
+            let (user_id, user_name) = extract_user_id_and_name(&message);
+            println!("Received: User ID: {}, User Name: {}", user_id, user_name);
 
             tokio::time::sleep(Duration::from_secs(1)).await;
         }
     }
 }
 
-//For tests purposes
+async fn read_message(socket: &zmq::Socket) -> Result<Vec<u8>> {
+    let message = socket.recv_msg(0)?;
+    print!("jarek read_message {:?}", socket.recv_msg(0)?);
+    Ok(message.to_vec())
+}
+
+//tmp solution :)
+fn extract_user_id_and_name(message: &[u8]) -> (u32, String) {
+    if message.len() >= 8 {
+        let user_id_bytes = &message[0..4];
+        let user_id = u32::from_le_bytes(user_id_bytes.try_into().unwrap_or_default());
+
+        if message.len() > 8 {
+            let user_name_bytes = &message[7..];
+            let user_name = String::from_utf8_lossy(user_name_bytes).to_string();
+
+            return (user_id, user_name);
+        }
+    }
+
+    (0, String::new())
+}
+
+async fn is_port_available(port: &str) -> bool {
+    TcpListener::bind(format!("127.0.0.1:{}", port))
+        .await
+        .is_ok()
+}
+
 impl Clone for Server {
     fn clone(&self) -> Self {
         Self {
@@ -49,68 +79,8 @@ impl Clone for Server {
     }
 }
 
-fn is_port_available(port: &str) -> bool {
-    TcpListener::bind(format!("127.0.0.1:{}", port)).is_ok()
-}
-
 pub async fn run_server() -> Result<()> {
     let server = Server::new().await?;
     server.run().await?;
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use async_zmq::Message;
-
-    use super::*;
-
-    #[tokio::test]
-    async fn test_run_server() {
-        let server = Server::new().await.unwrap();
-
-        let server_clone = server.clone();
-        let server_handle = tokio::spawn(async move {
-            server_clone.run().await.unwrap();
-        });
-
-        tokio::time::sleep(Duration::from_secs(1)).await;
-
-        let context = Context::new();
-        let subscriber = context.socket(zmq::SUB).unwrap();
-        subscriber
-            .connect(&format!("tcp://127.0.0.1:{}", SERVER_PORT))
-            .unwrap();
-        subscriber.set_subscribe(b"").unwrap();
-
-        tokio::time::sleep(Duration::from_secs(2)).await;
-
-        let received_message = subscriber.recv_msg(0).unwrap();
-        let expected_message = Message::from("Hello, world!");
-        assert_eq!(received_message, expected_message);
-
-        server_handle.abort();
-    }
-
-    #[tokio::test]
-    async fn test_server_address_not_available() {
-        let _context = Context::new();
-        let _listener = TcpListener::bind(format!("127.0.0.1:{}", SERVER_PORT)).unwrap();
-        let result = Server::new().await;
-
-        match result {
-            Err(async_zmq::Error::EADDRINUSE) => {
-                dbg!("Expected EADDRINUSE, the port is in use");
-                assert!(true);
-            }
-            Ok(_) => {
-                dbg!("Unexpected success, the port should be in use");
-                assert!(false, "Expected EADDRINUSE, but got success");
-            }
-            Err(err) => {
-                dbg!("Unexpected error: {:?}", err);
-                assert!(false, "Unexpected error: {:?}", err);
-            }
-        }
-    }
 }
