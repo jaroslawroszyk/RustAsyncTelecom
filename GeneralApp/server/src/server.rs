@@ -1,4 +1,6 @@
 use async_zmq::{zmq, Context, Result};
+use generated::company::*;
+use protobuf::Message;
 use tokio::{net::TcpListener, time::Duration};
 
 const SERVER_PORT: &str = "5556";
@@ -33,8 +35,27 @@ impl Server {
 
         loop {
             let message: Vec<u8> = read_message(&sub_socket).await?;
-            let (user_id, user_name) = extract_user_id_and_name(&message);
-            println!("Received: User ID: {}, User Name: {}", user_id, user_name);
+
+            if message.is_empty() {
+                continue;
+            }
+
+            let serialized_msg = &message[1..];
+
+            match generated::company::SomeMsg::parse_from_bytes(serialized_msg) {
+                Ok(msg) => match msg.msgtype {
+                    Some(some_msg::Msgtype::AddUser(ref msg)) => {
+                        let user_id = msg.user_id;
+                        println!("Deserialized: User ID: {}", user_id);
+                    }
+                    _ => {
+                        panic!("Unsupported msg type");
+                    }
+                },
+                Err(e) => {
+                    eprintln!("Error deserializing message: {:?}", e);
+                }
+            }
 
             tokio::time::sleep(Duration::from_secs(1)).await;
         }
@@ -45,23 +66,6 @@ async fn read_message(socket: &zmq::Socket) -> Result<Vec<u8>> {
     let message = socket.recv_msg(0)?;
     print!("jarek read_message {:?}", socket.recv_msg(0)?);
     Ok(message.to_vec())
-}
-
-//tmp solution :)
-fn extract_user_id_and_name(message: &[u8]) -> (u32, String) {
-    if message.len() >= 8 {
-        let user_id_bytes = &message[0..4];
-        let user_id = u32::from_le_bytes(user_id_bytes.try_into().unwrap_or_default());
-
-        if message.len() > 8 {
-            let user_name_bytes = &message[7..];
-            let user_name = String::from_utf8_lossy(user_name_bytes).to_string();
-
-            return (user_id, user_name);
-        }
-    }
-
-    (0, String::new())
 }
 
 async fn is_port_available(port: &str) -> bool {
