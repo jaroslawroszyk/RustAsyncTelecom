@@ -1,15 +1,16 @@
 use async_zmq::{zmq, Context, Result};
 use generated::company::*;
 use protobuf::Message;
-use tokio::time::Duration;
+use tokio::time::{timeout, Duration};
 
 fn build_msg(user_id: u32) -> SomeMsg {
     let mut msg = SomeMsg::new();
     let req = msg.mut_add_user();
     req.user_id = user_id;
-    print!("req.user_id: {:?}", req.user_id);
-
     req.user_name = "panicName".to_string();
+
+    print!("jarek user_id {}", req.user_id);
+
     msg
 }
 
@@ -39,18 +40,15 @@ pub async fn run_client() -> Result<()> {
     socket.connect("tcp://127.0.0.1:5556")?;
 
     let data = generate_data();
-    // println!("Generated data: {:?}", data.user);
+    println!("Client is running and should send");
 
-    for message in data {
-        let serialized_msg = serialize_msg(&message);
+    for message in &data {
+        let serialized_msg = serialize_msg(message);
+        println!("jarek serialized_msg {:?}", serialized_msg);
 
-        let size = serialized_msg.len() as u8;
-        let mut full_message = vec![size];
-        full_message.extend_from_slice(&serialized_msg);
+        socket.send(&serialized_msg, 0)?;
 
-        socket.send(full_message, 0)?;
-
-        tokio::time::sleep(Duration::from_secs(1)).await;
+        tokio::time::sleep(Duration::from_millis(2)).await;
     }
 
     Ok(())

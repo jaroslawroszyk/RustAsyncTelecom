@@ -35,14 +35,7 @@ impl Server {
 
         loop {
             let message: Vec<u8> = read_message(&sub_socket).await?;
-
-            if message.is_empty() {
-                continue;
-            }
-
-            let serialized_msg = &message[1..];
-
-            match generated::company::SomeMsg::parse_from_bytes(serialized_msg) {
+            match generated::company::SomeMsg::parse_from_bytes(&message) {
                 Ok(msg) => match msg.msgtype {
                     Some(some_msg::Msgtype::AddUser(ref msg)) => {
                         let user_id = msg.user_id;
@@ -56,15 +49,16 @@ impl Server {
                     eprintln!("Error deserializing message: {:?}", e);
                 }
             }
-
-            tokio::time::sleep(Duration::from_secs(1)).await;
+            println!("jarek sleep!!!!");
+            // tokio::time::sleep(Duration::from_secs(2)).await;
+            tokio::time::sleep(Duration::from_millis(2)).await;
         }
     }
 }
 
 async fn read_message(socket: &zmq::Socket) -> Result<Vec<u8>> {
     let message = socket.recv_msg(0)?;
-    print!("jarek read_message {:?}", socket.recv_msg(0)?);
+    print!("jarek read_message {:?}", message);
     Ok(message.to_vec())
 }
 
