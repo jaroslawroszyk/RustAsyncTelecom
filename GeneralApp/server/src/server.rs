@@ -1,11 +1,11 @@
 use async_zmq::{zmq, Context, Result};
 use generated::company::*;
 use protobuf::Message;
-use tokio::{net::TcpListener, time::Duration};
+use tokio::net::TcpListener;
 
-const SERVER_PORT: &str = "5556";
+const PORT: &str = "5556";
 
-#[allow(dead_code)]
+#[derive(Clone)]
 pub struct Server {
     context: Context,
     socket_address: String,
@@ -13,68 +13,46 @@ pub struct Server {
 
 impl Server {
     pub async fn new() -> Result<Self> {
-        if is_port_available(SERVER_PORT).await {
-            let context = Context::new();
-            let socket_address = format!("tcp://127.0.0.1:{}", SERVER_PORT);
-
-            Ok(Server {
-                context,
-                socket_address,
-            })
-        } else {
-            Err(async_zmq::Error::EADDRINUSE)
+        if !is_port_available(PORT).await {
+            return Err(async_zmq::Error::EADDRINUSE);
         }
+
+        Ok(Server {
+            context: Context::new(),
+            socket_address: format!("tcp://127.0.0.1:{PORT}"),
+        })
     }
 
     pub async fn run(&self) -> Result<()> {
-        let sub_socket = self.context.socket(zmq::SUB)?;
-        sub_socket.bind(&self.socket_address)?;
-        sub_socket.set_subscribe(b"")?;
+        let socket = self.context.socket(zmq::SUB)?;
+        socket.bind(&self.socket_address)?;
+        socket.set_subscribe(b"")?;
 
         println!("Server is running and waiting for messages...");
 
         loop {
-            let message: Vec<u8> = read_message(&sub_socket).await?;
-            match generated::company::SomeMsg::parse_from_bytes(&message) {
+            let message: Vec<u8> = read_message(&socket).await?;
+
+            match SomeMsg::parse_from_bytes(&message) {
                 Ok(msg) => match msg.msgtype {
                     Some(some_msg::Msgtype::AddUser(ref msg)) => {
-                        let user_id = msg.user_id;
-                        println!("Deserialized: User ID: {}", user_id);
+                        println!("Received message: add_user {{{msg}}}");
                     }
-                    _ => {
-                        panic!("Unsupported msg type");
-                    }
+                    _ => eprintln!("Received unsupported message: {msg}"),
                 },
-                Err(e) => {
-                    eprintln!("Error deserializing message: {:?}", e);
-                }
+                Err(e) => eprintln!("Unable to deserialize message: {e}"),
             }
-            println!("jarek sleep!!!!");
-            // tokio::time::sleep(Duration::from_secs(2)).await;
-            tokio::time::sleep(Duration::from_millis(2)).await;
         }
     }
 }
 
 async fn read_message(socket: &zmq::Socket) -> Result<Vec<u8>> {
     let message = socket.recv_msg(0)?;
-    print!("jarek read_message {:?}", message);
     Ok(message.to_vec())
 }
 
 async fn is_port_available(port: &str) -> bool {
-    TcpListener::bind(format!("127.0.0.1:{}", port))
-        .await
-        .is_ok()
-}
-
-impl Clone for Server {
-    fn clone(&self) -> Self {
-        Self {
-            context: self.context.clone(),
-            socket_address: self.socket_address.clone(),
-        }
-    }
+    TcpListener::bind(format!("127.0.0.1:{port}")).await.is_ok()
 }
 
 pub async fn run_server() -> Result<()> {
