@@ -2,27 +2,28 @@ syntax = "proto3";
 
 package itf;
 
-enum CompanyCategory {
-    LEGAL = 0;
-    ILLEGAL = 1;    
+message AddUserReq {
+    uint32 user_id = 1;
+    string user_name = 2;
 }
-
-message Company {
-    uint32 company_id = 1;
-    string name = 2;
-    oneof Result {
-        uint32 user_id = 3;
-        CompanyCategory code = 4;
-    }
-}
-
-message AddUser {
+message AddUserResp {
     uint32 user_id = 1;
     string user_name = 2;
 }
 
+message HeartbeatReq {
+    string message = 1;
+}
+
+message HeartbeatResp {
+    string message = 1;
+}
+
 message SomeMsg {
     oneof msgtype {
-        AddUser add_user = 1;
+        HeartbeatReq HeartbeatReq = 1;
+        HeartbeatResp HeartbeatResp = 2;
+        AddUserReq add_user_req = 3;
+        AddUserResp add_user_resp = 4; 
     }
 }
