@@ -77,11 +77,13 @@ pub async fn run_client() -> Result<()> {
     let msgs = generate_messages();
     let mut iter = msgs.iter().peekable();
 
+    let mut heartbeat_received = false;
+
     loop {
         let read_queue_empty = socket.poll(POLLIN, 1)? == 0;
-        let we_have_shit_to_do = iter.peek().is_some();
+        let we_have_next_msg = iter.peek().is_some();
 
-        if read_queue_empty && we_have_shit_to_do {
+        if heartbeat_received && read_queue_empty && we_have_next_msg {
             let message = iter.next().unwrap();
             println!("Sent message: {message}");
             let serialized_msg = serialize_message(message);
@@ -107,6 +109,7 @@ pub async fn run_client() -> Result<()> {
                     }
                     Some(some_msg::Msgtype::HeartbeatResp(_)) => {
                         println!("Received HeartbeatResp from the server {{{msg}}}");
+                        heartbeat_received = true;
                     }
                     _ => {
                         eprintln!("Received unexpected response: {:?}", msg);
