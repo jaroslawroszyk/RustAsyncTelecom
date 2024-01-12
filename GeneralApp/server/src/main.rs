@@ -1,4 +1,4 @@
-use async_zmq::Result;
+use anyhow::Result;
 use server::run_server;
 
 mod server;

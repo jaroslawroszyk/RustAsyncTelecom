@@ -6,6 +6,7 @@ message AddUserReq {
     uint32 user_id = 1;
     string user_name = 2;
 }
+
 message AddUserResp {
     uint32 user_id = 1;
     string user_name = 2;

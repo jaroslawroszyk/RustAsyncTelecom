@@ -1,6 +1,11 @@
-use async_zmq::{zmq, Context, Result};
+use anyhow::Result;
+use async_zmq::{
+    zmq::{self, POLLIN},
+    Context,
+};
 use generated::company::*;
 use protobuf::Message;
+use rand::Rng;
 use std::time::Duration;
 
 const PORT: &str = "5556";
@@ -23,7 +28,7 @@ fn serialize_message(msg: &SomeMsg) -> Vec<u8> {
 }
 
 fn generate_messages() -> Vec<SomeMsg> {
-    let user_ids = 69..80;
+    let user_ids = 69..79;
     user_ids.map(build_message).collect()
 }
 
@@ -36,16 +41,18 @@ fn build_heartbeat_req_message() -> SomeMsg {
     msg
 }
 
-async fn receive_response(socket: &zmq::Socket) -> Result<Vec<u8>> {
-    let message = socket.recv_msg(0)?;
-    Ok(message.to_vec())
-}
+// fn receive_response(socket: &zmq::Socket) -> Result<Vec<u8>> {
+//     let message = socket.recv_msg(0)?;
+//     Ok(message.to_vec())
+// }
 
 pub async fn run_client() -> Result<()> {
     let context = Context::new();
-    let socket = context.socket(zmq::DEALER)?;
 
-    let client_id = "123"; // Możesz dostosować identyfikator klienta według potrzeb
+    let mut rng = rand::thread_rng();
+    let client_id: String = rng.gen_range(1000..9999).to_string();
+
+    let socket = context.socket(zmq::DEALER)?;
     socket.set_identity(client_id.as_bytes())?;
 
     let address = format!("tcp://127.0.0.1:{}", PORT);
@@ -67,33 +74,48 @@ pub async fn run_client() -> Result<()> {
         return Err(e.into());
     }
 
-    let response = receive_response(&socket).await?;
-    match SomeMsg::parse_from_bytes(&response) {
-        Ok(msg) => match msg.msgtype {
-            Some(some_msg::Msgtype::HeartbeatResp(_)) => {
-                println!("Received HeartbeatResp from the server {{{msg}}}");
-                tokio::time::sleep(Duration::from_millis(1)).await;
+    let msgs = generate_messages();
+    let mut iter = msgs.iter().peekable();
 
-                for message in &generate_messages() {
-                    println!("Sent message: {message}");
-                    let serialized_msg = serialize_message(message);
-                    tokio::time::sleep(Duration::from_secs(1)).await;
+    loop {
+        let read_queue_empty = socket.poll(POLLIN, 1)? == 0;
+        let we_have_shit_to_do = iter.peek().is_some();
 
-                    if let Err(e) = socket.send(&serialized_msg, 0) {
-                        eprintln!("Failed to send message. ERR: {:?}", e);
-                        return Err(e.into());
+        if read_queue_empty && we_have_shit_to_do {
+            let message = iter.next().unwrap();
+            println!("Sent message: {message}");
+            let serialized_msg = serialize_message(message);
+            tokio::time::sleep(Duration::from_secs(1)).await;
+
+            if let Err(e) = socket.send(&serialized_msg, 0) {
+                eprintln!("Failed to send message. ERR: {:?}", e);
+                return Err(e.into());
+            }
+        } else {
+            if socket.poll(POLLIN, 10)? == 0 {
+                break;
+            }
+
+            let Ok(resp) = socket.recv_msg(0) else {
+                continue;
+            };
+
+            match SomeMsg::parse_from_bytes(&resp) {
+                Ok(msg) => match msg.msgtype {
+                    Some(some_msg::Msgtype::AddUserResp(_)) => {
+                        println!("Received AddUserResp from the server {{{msg}}}");
                     }
+                    Some(some_msg::Msgtype::HeartbeatResp(_)) => {
+                        println!("Received HeartbeatResp from the server {{{msg}}}");
+                    }
+                    _ => {
+                        eprintln!("Received unexpected response: {:?}", msg);
+                    }
+                },
+                Err(e) => {
+                    eprintln!("Unable to deserialize response: {:?}", e);
                 }
             }
-            Some(some_msg::Msgtype::AddUserResp(_)) => {
-                println!("Received AddUserResp from the server {{{msg}}}");
-            }
-            _ => {
-                eprintln!("Received unexpected response: {:?}", msg);
-            }
-        },
-        Err(e) => {
-            eprintln!("Unable to deserialize response: {:?}", e);
         }
     }
 

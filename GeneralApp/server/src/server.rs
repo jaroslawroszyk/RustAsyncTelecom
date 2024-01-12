@@ -1,7 +1,11 @@
-use async_zmq::{zmq, Context, Result};
+use std::time::Duration;
+
+use anyhow::{bail, Result};
+use async_zmq::{zmq, Context};
 use generated::company::*;
 use protobuf::Message;
 use tokio::net::TcpListener;
+use zmq::SNDMORE;
 
 const PORT: &str = "5556";
 
@@ -14,7 +18,7 @@ pub struct Server {
 impl Server {
     pub async fn new() -> Result<Self> {
         if !is_port_available(PORT).await {
-            return Err(async_zmq::Error::EADDRINUSE);
+            bail!(async_zmq::Error::EADDRINUSE);
         }
 
         Ok(Server {
@@ -42,10 +46,14 @@ impl Server {
                             let serialized_heartbeat_msg_response =
                                 serialize_message(&heartbeat_msg_response);
                             println!("jarek identity.clone() heartbeat {:?}", identity.clone());
-                            socket.send_multipart(
-                                vec![identity.clone(), serialized_heartbeat_msg_response],
-                                0,
-                            )?;
+
+                            socket.send(&identity, SNDMORE).unwrap();
+                            socket.send(serialized_heartbeat_msg_response, 0)?;
+                            println!("sent response for hearbeat");
+                            // socket.send_multipart(
+                            //     vec![identity.clone(), serialized_heartbeat_msg_response],
+                            //     0,
+                            // )?;
                         }
                         Some(some_msg::Msgtype::AddUserReq(ref msg)) => {
                             println!("Received message: add_user {{{msg}}}");
@@ -55,10 +63,11 @@ impl Server {
                             println!("Send to the client message: add_user_resp {{{build_add_user_resp}}}");
                             println!("jarek identity.clone() AddUserReq {:?}", identity.clone());
 
-                            socket.send_multipart(
-                                vec![identity.clone(), serialized_build_add_user_resp],
-                                0,
-                            )?;
+                            tokio::time::sleep(Duration::from_millis(3)).await;
+                            socket.send(&identity, SNDMORE).unwrap();
+                            // socket.send(serialized_build_add_user_resp,0,)?;
+                            // socket.send(serialized_build_add_user_resp,0,)?;
+                            socket.send(serialized_build_add_user_resp, 0)?;
                         }
                         _ => eprintln!("Received unsupported message: {msg}"),
                     }
