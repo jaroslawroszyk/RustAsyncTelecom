@@ -4,11 +4,17 @@ use async_zmq::{
     Context,
 };
 use generated::company::*;
+use lazy_static::lazy_static;
 use protobuf::Message;
 use rand::Rng;
 use std::time::Duration;
 
+//TODO: czytanie portu i addresu zrob z pliku config :)
 const PORT: &str = "5556";
+
+lazy_static! {
+    static ref ADDRESS: String = format!("tcp://127.0.0.1:{}", PORT);
+}
 
 enum State {
     Initializing,
@@ -53,8 +59,7 @@ async fn initialize_client(socket: &zmq::Socket) -> Result<()> {
     let client_id: String = rng.gen_range(1000..9999).to_string();
 
     socket.set_identity(client_id.as_bytes())?;
-    let address = format!("tcp://127.0.0.1:{}", PORT);
-    match socket.connect(&address) {
+    match socket.connect(&ADDRESS) {
         Err(e) => eprintln!("No connection to the server. Cannot send messages. ERR: {e}"),
         Ok(_) => println!("Connected to the server at tcp://127.0.0.1:{PORT}"),
     };
@@ -143,7 +148,7 @@ pub async fn run_client() -> Result<()> {
             State::SendingAddUserReq => {
                 if let Err(e) = sending_add_user_req(&socket, &mut iter).await {
                     eprintln!("Error: {:?}", e);
-                    if let Err(e) = socket.disconnect("tcp://127.0.0.1:5556") {
+                    if let Err(e) = socket.disconnect(&ADDRESS) {
                         eprintln!("Error disconnecting socket: {:?}", e);
                     }
                     break;

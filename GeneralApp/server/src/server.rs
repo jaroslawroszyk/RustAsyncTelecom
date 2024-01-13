@@ -50,10 +50,6 @@ impl Server {
                             socket.send(&identity, SNDMORE).unwrap();
                             socket.send(serialized_heartbeat_msg_response, 0)?;
                             println!("sent response for hearbeat");
-                            // socket.send_multipart(
-                            //     vec![identity.clone(), serialized_heartbeat_msg_response],
-                            //     0,
-                            // )?;
                         }
                         Some(some_msg::Msgtype::AddUserReq(ref msg)) => {
                             println!("Received message: add_user {{{msg}}}");
@@ -65,8 +61,6 @@ impl Server {
 
                             tokio::time::sleep(Duration::from_millis(3)).await;
                             socket.send(&identity, SNDMORE).unwrap();
-                            // socket.send(serialized_build_add_user_resp,0,)?;
-                            // socket.send(serialized_build_add_user_resp,0,)?;
                             socket.send(serialized_build_add_user_resp, 0)?;
                         }
                         _ => eprintln!("Received unsupported message: {msg}"),
