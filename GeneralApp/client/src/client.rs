@@ -77,7 +77,51 @@ async fn send_heartbeat_request(socket: &zmq::Socket) -> Result<()> {
     Ok(())
 }
 
-//TODO: wysylamy heartbet i nie czekamy na response dodac ze jak response nie przyjdzie nie idz dalej!
+async fn sending_add_user_req(
+    socket: &zmq::Socket,
+    iter: &mut std::slice::Iter<'_, SomeMsg>,
+) -> Result<()> {
+    if let Some(message) = iter.next() {
+        let serialized_msg = serialize_message(message);
+
+        if let Err(e) = socket.send(&serialized_msg, 0) {
+            eprintln!("Failed to send message. ERR: {:?}", e);
+            return Err(e.into());
+        }
+
+        println!("Sent message: {{{message}}}");
+        tokio::time::sleep(Duration::from_secs(1)).await;
+
+        if socket.poll(POLLIN, 10)? != 0 {
+            let resp = socket.recv_msg(0)?;
+
+            match SomeMsg::parse_from_bytes(&resp) {
+                Ok(msg) => match msg.msgtype {
+                    Some(some_msg::Msgtype::AddUserResp(_)) => {
+                        println!("Received AddUserResp from the server {{{msg}}}");
+                    }
+                    Some(some_msg::Msgtype::HeartbeatResp(_)) => {
+                        println!("Received HeartbeatResp from the server {{{msg}}}");
+                    }
+                    _ => {
+                        eprintln!("Received unexpected response: {:?}", msg);
+                    }
+                },
+                Err(e) => {
+                    eprintln!("Unable to deserialize response: {:?}", e);
+                }
+            }
+        }
+
+        Ok(())
+    } else {
+        Err(anyhow::anyhow!("No more messages to send"))
+    }
+}
+
+//state machines method
+
+//TODO: wysylamy heartbet i nie czekamy na response - dodac ze jak response nie przyjdzie nie idzie dalej!
 pub async fn run_client() -> Result<()> {
     let context = Context::new();
     let socket = context.socket(zmq::DEALER)?;
@@ -97,41 +141,11 @@ pub async fn run_client() -> Result<()> {
                 state = State::SendingAddUserReq;
             }
             State::SendingAddUserReq => {
-                if let Some(message) = iter.next() {
-                    let serialized_msg = serialize_message(message);
-
-                    if let Err(e) = socket.send(&serialized_msg, 0) {
-                        eprintln!("Failed to send message. ERR: {:?}", e);
-                        return Err(e.into());
+                if let Err(e) = sending_add_user_req(&socket, &mut iter).await {
+                    eprintln!("Error: {:?}", e);
+                    if let Err(e) = socket.disconnect("tcp://127.0.0.1:5556") {
+                        eprintln!("Error disconnecting socket: {:?}", e);
                     }
-
-                    println!("Sent message: {{{message}}}");
-                    tokio::time::sleep(Duration::from_secs(1)).await;
-
-                    if socket.poll(POLLIN, 10)? != 0 {
-                        let resp = socket.recv_msg(0)?;
-
-                        match SomeMsg::parse_from_bytes(&resp) {
-                            Ok(msg) => match msg.msgtype {
-                                Some(some_msg::Msgtype::AddUserResp(_)) => {
-                                    println!("Received AddUserResp from the server {{{msg}}}");
-                                }
-                                Some(some_msg::Msgtype::HeartbeatResp(_)) => {
-                                    println!("Received HeartbeatResp from the server {{{msg}}}");
-                                }
-                                _ => {
-                                    eprintln!("Received unexpected response: {:?}", msg);
-                                }
-                            },
-                            Err(e) => {
-                                eprintln!("Unable to deserialize response: {:?}", e);
-                            }
-                        }
-                    }
-                } else {
-                    // if no more msg break the loop!!!
-                    // todo: problem z zamknięciem gniazda - rozwiazany?
-                    let _ = socket.disconnect("tcp://127.0.0.1:5556");
                     break;
                 }
             }
