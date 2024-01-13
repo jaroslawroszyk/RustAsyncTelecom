@@ -13,3 +13,4 @@ rand = "0.8"
 generated = { path = "../generated" }
 anyhow = "1.0.79"
 lazy_static = "1.4"
+config = "0.13.4"

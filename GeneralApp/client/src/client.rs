@@ -3,17 +3,35 @@ use async_zmq::{
     zmq::{self, POLLIN},
     Context,
 };
+use config::{Config, File, FileFormat};
 use generated::company::*;
 use lazy_static::lazy_static;
 use protobuf::Message;
 use rand::Rng;
 use std::time::Duration;
 
-//TODO: czytanie portu i addresu zrob z pliku config :)
-const PORT: &str = "5556";
+//TODO: add to common place
 
 lazy_static! {
-    static ref ADDRESS: String = format!("tcp://127.0.0.1:{}", PORT);
+    pub static ref CONFIG: Config = {
+        let builder = Config::builder()
+            .add_source(File::new("config", FileFormat::Toml).required(false))
+            .set_override("override", "1")
+            .expect("Cant  build config");
+
+        builder.build().unwrap_or_else(|e| {
+            eprintln!("Failed to build config: {}", e);
+            Config::default()
+        })
+    };
+}
+
+lazy_static! {
+    static ref ADDRESS: String = format!(
+        "tcp://{}:{}",
+        CONFIG.get_string("address").unwrap(),
+        CONFIG.get_int("port").unwrap()
+    );
 }
 
 enum State {
@@ -61,7 +79,15 @@ async fn initialize_client(socket: &zmq::Socket) -> Result<()> {
     socket.set_identity(client_id.as_bytes())?;
     match socket.connect(&ADDRESS) {
         Err(e) => eprintln!("No connection to the server. Cannot send messages. ERR: {e}"),
-        Ok(_) => println!("Connected to the server at tcp://127.0.0.1:{PORT}"),
+        Ok(_) =>
+        //println!("Connected to the server at tcp://127.0.0.1:{PORT}"),
+        {
+            println!(
+                "Connected to the server at tcp://{}:{}",
+                CONFIG.get_string("address").unwrap(),
+                CONFIG.get_int("port").unwrap()
+            )
+        }
     };
 
     Ok(())
