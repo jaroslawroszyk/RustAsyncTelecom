@@ -3,36 +3,11 @@ use async_zmq::{
     zmq::{self, POLLIN},
     Context,
 };
-use config::{Config, File, FileFormat};
+use dotenv_codegen::dotenv;
 use generated::company::*;
-use lazy_static::lazy_static;
 use protobuf::Message;
 use rand::Rng;
 use std::time::Duration;
-
-//TODO: add to common place
-
-lazy_static! {
-    pub static ref CONFIG: Config = {
-        let builder = Config::builder()
-            .add_source(File::new("config", FileFormat::Toml).required(false))
-            .set_override("override", "1")
-            .expect("Cant  build config");
-
-        builder.build().unwrap_or_else(|e| {
-            eprintln!("Failed to build config: {}", e);
-            Config::default()
-        })
-    };
-}
-
-lazy_static! {
-    static ref ADDRESS: String = format!(
-        "tcp://{}:{}",
-        CONFIG.get_string("address").unwrap(),
-        CONFIG.get_int("port").unwrap()
-    );
-}
 
 enum State {
     Initializing,
@@ -58,7 +33,7 @@ fn serialize_message(msg: &SomeMsg) -> Vec<u8> {
 }
 
 fn generate_messages() -> Vec<SomeMsg> {
-    let user_ids = 69..=78;
+    let user_ids = 69..=72;
     user_ids.map(build_message).collect()
 }
 
@@ -77,16 +52,10 @@ async fn initialize_client(socket: &zmq::Socket) -> Result<()> {
     let client_id: String = rng.gen_range(1000..9999).to_string();
 
     socket.set_identity(client_id.as_bytes())?;
-    match socket.connect(&ADDRESS) {
+    match socket.connect(&dotenv!("IP_ADDRESS")) {
         Err(e) => eprintln!("No connection to the server. Cannot send messages. ERR: {e}"),
-        Ok(_) =>
-        //println!("Connected to the server at tcp://127.0.0.1:{PORT}"),
-        {
-            println!(
-                "Connected to the server at tcp://{}:{}",
-                CONFIG.get_string("address").unwrap(),
-                CONFIG.get_int("port").unwrap()
-            )
+        Ok(_) => {
+            println!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
         }
     };
 
@@ -174,7 +143,7 @@ pub async fn run_client() -> Result<()> {
             State::SendingAddUserReq => {
                 if let Err(e) = sending_add_user_req(&socket, &mut iter).await {
                     eprintln!("Error: {:?}", e);
-                    if let Err(e) = socket.disconnect(&ADDRESS) {
+                    if let Err(e) = socket.disconnect(&dotenv!("IP_ADDRESS")) {
                         eprintln!("Error disconnecting socket: {:?}", e);
                     }
                     break;

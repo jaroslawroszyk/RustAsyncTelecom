@@ -1,13 +1,11 @@
-use std::time::Duration;
-
 use anyhow::{bail, Result};
 use async_zmq::{zmq, Context};
+use dotenv_codegen::dotenv;
 use generated::company::*;
 use protobuf::Message;
+use std::time::Duration;
 use tokio::net::TcpListener;
 use zmq::SNDMORE;
-
-const PORT: &str = "5556";
 
 #[derive(Clone)]
 pub struct Server {
@@ -17,13 +15,13 @@ pub struct Server {
 
 impl Server {
     pub async fn new() -> Result<Self> {
-        if !is_port_available(PORT).await {
+        if !is_port_available(dotenv!("PORT")).await {
             bail!(async_zmq::Error::EADDRINUSE);
         }
 
         Ok(Server {
             context: Context::new(),
-            socket_address: format!("tcp://127.0.0.1:{}", PORT),
+            socket_address: (&dotenv!("IP_ADDRESS")).to_string(),
         })
     }
 
@@ -73,7 +71,8 @@ impl Server {
 }
 
 async fn is_port_available(port: &str) -> bool {
-    TcpListener::bind(format!("127.0.0.1:{port}")).await.is_ok()
+    let addres = dotenv!("ADDRESS");
+    TcpListener::bind(format!("{addres}:{port}")).await.is_ok()
 }
 
 fn serialize_message(msg: &SomeMsg) -> Vec<u8> {

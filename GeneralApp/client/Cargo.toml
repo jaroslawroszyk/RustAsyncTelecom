@@ -12,5 +12,5 @@ protobuf = "3.2.0"
 rand = "0.8"
 generated = { path = "../generated" }
 anyhow = "1.0.79"
-lazy_static = "1.4"
-config = "0.13.4"
+dotenv_codegen = "0.15.0"
+dotenv = "0.15.0"
