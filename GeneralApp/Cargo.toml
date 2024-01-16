@@ -5,3 +5,4 @@ members = [
     "client",
     "server"
 ]
+    # "generated" zrobi tak zeby to nie musialo sie budowac
