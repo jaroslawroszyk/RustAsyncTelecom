@@ -5,10 +5,7 @@ use generated::company::*;
 use protobuf::Message;
 use std::time::Duration;
 
-use crate::{
-    serializers::serialize_message,
-};
-
+use crate::serializers::serialize_message;
 
 pub async fn sending_add_user_req(
     socket: &zmq::Socket,

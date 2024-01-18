@@ -43,7 +43,7 @@ impl Server {
                             let heartbeat_msg_response = build_heartbeat_response();
                             let serialized_heartbeat_msg_response =
                                 serialize_message(&heartbeat_msg_response);
-                            println!("jarek identity.clone() heartbeat {:?}", identity.clone());
+                            // println!("jarek identity.clone() heartbeat {:?}", identity.clone()); payload
 
                             socket.send(&identity, SNDMORE).unwrap();
                             socket.send(serialized_heartbeat_msg_response, 0)?;
@@ -55,7 +55,7 @@ impl Server {
                             let serialized_build_add_user_resp =
                                 serialize_message(&build_add_user_resp);
                             println!("Send to the client message: add_user_resp {{{build_add_user_resp}}}");
-                            println!("jarek identity.clone() AddUserReq {:?}", identity.clone());
+                            // println!("jarek identity.clone() AddUserReq {:?}", identity.clone()); payload
 
                             tokio::time::sleep(Duration::from_millis(3)).await;
                             socket.send(&identity, SNDMORE).unwrap();

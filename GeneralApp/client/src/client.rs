@@ -1,24 +1,11 @@
 use anyhow::Result;
-use async_zmq::{
-    zmq::{self, POLLIN},
-    Context,
-};
+use async_zmq::{Context, zmq};
 use dotenv_codegen::dotenv;
 use generated::company::*;
-use protobuf::Message;
-use std::time::Duration;
 
+use crate::fsm::state::State;
 use crate::fsm::{send_heartbeat_request, sending_add_user_req};
-use crate::{
-    fsm::{initialize_client, machines},
-    serializers::serialize_message,
-};
-
-enum State {
-    Initializing,
-    SendingHeartbeatReq,
-    SendingAddUserReq,
-}
+use crate::fsm::{initialize_client, machines};
 
 fn build_message(user_id: u32) -> SomeMsg {
     let mut msg = SomeMsg::new();
