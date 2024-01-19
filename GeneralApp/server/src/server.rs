@@ -3,7 +3,6 @@ use async_zmq::{zmq, Context};
 use dotenv_codegen::dotenv;
 use generated::company::*;
 use protobuf::Message;
-use std::time::Duration;
 use tokio::net::TcpListener;
 use zmq::SNDMORE;
 
@@ -51,13 +50,13 @@ impl Server {
                         }
                         Some(some_msg::Msgtype::AddUserReq(ref msg)) => {
                             println!("Received message: add_user {{{msg}}}");
-                            let build_add_user_resp = build_add_user_response();
+                            let build_add_user_resp = build_add_user_response(msg);
                             let serialized_build_add_user_resp =
                                 serialize_message(&build_add_user_resp);
                             println!("Send to the client message: add_user_resp {{{build_add_user_resp}}}");
                             // println!("jarek identity.clone() AddUserReq {:?}", identity.clone()); payload
 
-                            tokio::time::sleep(Duration::from_millis(3)).await;
+                            // tokio::time::sleep(Duration::from_millis(3)).await;
                             socket.send(&identity, SNDMORE).unwrap();
                             socket.send(serialized_build_add_user_resp, 0)?;
                         }
@@ -91,15 +90,15 @@ fn build_heartbeat_response() -> SomeMsg {
     msg
 }
 
-//TODO: read user_id and user_name from request
-fn build_add_user_response() -> SomeMsg {
+fn build_add_user_response(add_user_req: &AddUserReq) -> SomeMsg {
     let mut msg = SomeMsg::new();
     let req = msg.mut_add_user_resp();
-    req.user_id = 420;
-    req.user_name = "OK RECEIVED".into();
+    req.user_id = add_user_req.user_id;
+    req.user_name = format!("OK RECEIVED for {}", add_user_req.user_name);
 
     msg
 }
+
 
 pub async fn run_server() -> Result<()> {
     let server = Server::new().await?;

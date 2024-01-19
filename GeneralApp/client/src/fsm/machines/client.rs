@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use anyhow::{Ok, Result};
 use async_zmq::zmq;
 use dotenv_codegen::dotenv;
@@ -7,19 +9,35 @@ use crate::fsm::initialize_client;
 use crate::fsm::state::State;
 use crate::fsm::{send_heartbeat_request, sending_add_user_req};
 
-fn build_message(user_id: u32) -> SomeMsg {
+// fn build_message(user_id: u32) -> SomeMsg {
+//     let mut msg = SomeMsg::new();
+//     let req = msg.mut_add_user_req();
+
+//     req.user_id = user_id;
+//     req.user_name = "panicName".into();
+
+//     msg
+// }
+
+fn build_message(user_id: u32, user_name: &str) -> SomeMsg {
     let mut msg = SomeMsg::new();
     let req = msg.mut_add_user_req();
 
     req.user_id = user_id;
-    req.user_name = "panicName".into();
+    req.user_name = user_name.to_string(); 
 
     msg
 }
 
+// fn generate_messages() -> Vec<SomeMsg> {
+//     let user_ids = 1..=10;
+//     user_ids.map(build_message).collect()
+// }
 fn generate_messages() -> Vec<SomeMsg> {
     let user_ids = 1..=10;
-    user_ids.map(build_message).collect()
+    let user_names = vec!["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack"];
+
+    user_ids.zip(user_names.into_iter()).map(|(id, name)| build_message(id, name)).collect()
 }
 
 pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
@@ -35,6 +53,8 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
             }
             State::SendingHeartbeatReq => {
                 send_heartbeat_request(&socket).await?;
+                tokio::time::sleep(Duration::from_millis(3)).await;
+        
                 state = State::SendingAddUserReq;
             }
             State::SendingAddUserReq => {
