@@ -1,7 +1,7 @@
 use anyhow::Result;
 use async_zmq::zmq::{self, POLLIN};
 
-use generated::company::*;
+use generated::communication::*;
 use protobuf::Message;
 use std::time::Duration;
 
@@ -9,7 +9,7 @@ use crate::serializers::serialize_message;
 
 pub async fn sending_add_user_req(
     socket: &zmq::Socket,
-    iter: &mut std::slice::Iter<'_, SomeMsg>,
+    iter: &mut std::slice::Iter<'_, OperationMessage>,
 ) -> Result<()> {
     if let Some(message) = iter.next() {
         let serialized_msg = serialize_message(message);
@@ -25,12 +25,12 @@ pub async fn sending_add_user_req(
         if socket.poll(POLLIN, 10)? != 0 {
             let resp = socket.recv_msg(0)?;
 
-            match SomeMsg::parse_from_bytes(&resp) {
+            match OperationMessage::parse_from_bytes(&resp) {
                 Ok(msg) => match msg.msgtype {
-                    Some(some_msg::Msgtype::AddUserResp(_)) => {
+                    Some(operation_message::Msgtype::AddUserResp(_)) => {
                         println!("Received AddUserResp from the server {{{msg}}}");
                     }
-                    Some(some_msg::Msgtype::HeartbeatResp(_)) => {
+                    Some(operation_message::Msgtype::HeartbeatResp(_)) => {
                         println!("Received HeartbeatResp from the server {{{msg}}}");
                     }
                     _ => {

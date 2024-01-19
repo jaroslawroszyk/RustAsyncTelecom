@@ -1,3 +1,3 @@
 // @generated
 
-pub mod company;
+pub mod communication;

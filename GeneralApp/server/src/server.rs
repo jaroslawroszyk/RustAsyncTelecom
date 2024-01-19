@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 use async_zmq::{zmq, Context};
 use dotenv_codegen::dotenv;
-use generated::company::*;
+use generated::communication::*;
 use protobuf::Message;
 use tokio::net::TcpListener;
 use zmq::SNDMORE;
@@ -34,10 +34,10 @@ impl Server {
             let identity: Vec<u8> = socket.recv_msg(0)?.to_vec();
             let message: Vec<u8> = socket.recv_msg(0)?.to_vec();
 
-            match SomeMsg::parse_from_bytes(&message) {
+            match OperationMessage::parse_from_bytes(&message) {
                 Ok(msg) => {
                     match msg.msgtype {
-                        Some(some_msg::Msgtype::HeartbeatReq(ref msg)) => {
+                        Some(operation_message::Msgtype::HeartbeatReq(ref msg)) => {
                             println!("Received message: HeartbeatReq {{{msg}}}");
                             let heartbeat_msg_response = build_heartbeat_response();
                             let serialized_heartbeat_msg_response =
@@ -48,7 +48,7 @@ impl Server {
                             socket.send(serialized_heartbeat_msg_response, 0)?;
                             println!("sent response for hearbeat");
                         }
-                        Some(some_msg::Msgtype::AddUserReq(ref msg)) => {
+                        Some(operation_message::Msgtype::AddUserReq(ref msg)) => {
                             println!("Received message: add_user {{{msg}}}");
                             let build_add_user_resp = build_add_user_response(msg);
                             let serialized_build_add_user_resp =
@@ -74,23 +74,23 @@ async fn is_port_available(port: &str) -> bool {
     TcpListener::bind(format!("{addres}:{port}")).await.is_ok()
 }
 
-fn serialize_message(msg: &SomeMsg) -> Vec<u8> {
+fn serialize_message(msg: &OperationMessage) -> Vec<u8> {
     let mut buf: Vec<u8> = Vec::new();
     msg.write_to_vec(&mut buf)
         .expect("Failed to serialize message");
     buf
 }
 
-fn build_heartbeat_response() -> SomeMsg {
-    let mut msg = SomeMsg::new();
+fn build_heartbeat_response() -> OperationMessage {
+    let mut msg = OperationMessage::new();
     let req = msg.mut_HeartbeatResp();
     req.message = "I'M ALIVE!".into();
 
     msg
 }
 
-fn build_add_user_response(add_user_req: &AddUserReq) -> SomeMsg {
-    let mut msg = SomeMsg::new();
+fn build_add_user_response(add_user_req: &AddUserReq) -> OperationMessage {
+    let mut msg = OperationMessage::new();
     let req = msg.mut_add_user_resp();
     req.user_id = add_user_req.user_id;
     req.user_name = format!("OK RECEIVED for {}", add_user_req.user_name);

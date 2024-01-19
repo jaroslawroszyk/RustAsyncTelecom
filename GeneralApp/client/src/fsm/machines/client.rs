@@ -3,14 +3,14 @@ use std::time::Duration;
 use anyhow::{Ok, Result};
 use async_zmq::zmq;
 use dotenv_codegen::dotenv;
-use generated::company::*;
+use generated::communication::*;
 
 use crate::fsm::initialize_client;
 use crate::fsm::state::State;
 use crate::fsm::{send_heartbeat_request, sending_add_user_req};
 
-fn build_message(user_id: u32, user_name: &str) -> SomeMsg {
-    let mut msg = SomeMsg::new();
+fn build_message(user_id: u32, user_name: &str) -> OperationMessage {
+    let mut msg = OperationMessage::new();
     let req = msg.mut_add_user_req();
 
     req.user_id = user_id;
@@ -19,7 +19,7 @@ fn build_message(user_id: u32, user_name: &str) -> SomeMsg {
     msg
 }
 
-fn generate_messages() -> Vec<SomeMsg> {
+fn generate_messages() -> Vec<OperationMessage> {
     let user_ids = 1..=10;
     let user_names = vec![
         "Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack",

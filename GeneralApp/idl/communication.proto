@@ -20,7 +20,7 @@ message HeartbeatResp {
     string message = 1;
 }
 
-message SomeMsg {
+message OperationMessage {
     oneof msgtype {
         HeartbeatReq HeartbeatReq = 1;
         HeartbeatResp HeartbeatResp = 2;

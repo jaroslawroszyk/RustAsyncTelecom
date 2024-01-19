@@ -1,7 +1,7 @@
-use generated::company::*;
+use generated::communication::*;
 
-pub fn build_heartbeat_req_message() -> SomeMsg {
-    let mut msg = SomeMsg::new();
+pub fn build_heartbeat_req_message() -> OperationMessage {
+    let mut msg = OperationMessage::new();
     let req = msg.mut_HeartbeatReq();
 
     req.message = "YOU ALIVE?".into();
