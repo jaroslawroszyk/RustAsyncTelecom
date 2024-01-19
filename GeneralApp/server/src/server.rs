@@ -81,7 +81,6 @@ fn serialize_message(msg: &SomeMsg) -> Vec<u8> {
     buf
 }
 
-//TODO: change message to the client
 fn build_heartbeat_response() -> SomeMsg {
     let mut msg = SomeMsg::new();
     let req = msg.mut_HeartbeatResp();
@@ -98,7 +97,6 @@ fn build_add_user_response(add_user_req: &AddUserReq) -> SomeMsg {
 
     msg
 }
-
 
 pub async fn run_server() -> Result<()> {
     let server = Server::new().await?;

@@ -14,16 +14,21 @@ fn build_message(user_id: u32, user_name: &str) -> SomeMsg {
     let req = msg.mut_add_user_req();
 
     req.user_id = user_id;
-    req.user_name = user_name.to_string(); 
+    req.user_name = user_name.to_string();
 
     msg
 }
 
 fn generate_messages() -> Vec<SomeMsg> {
     let user_ids = 1..=10;
-    let user_names = vec!["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack"];
+    let user_names = vec![
+        "Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack",
+    ];
 
-    user_ids.zip(user_names.into_iter()).map(|(id, name)| build_message(id, name)).collect()
+    user_ids
+        .zip(user_names.into_iter())
+        .map(|(id, name)| build_message(id, name))
+        .collect()
 }
 
 pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
@@ -40,7 +45,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
             State::SendingHeartbeatReq => {
                 send_heartbeat_request(&socket).await?;
                 tokio::time::sleep(Duration::from_millis(3)).await;
-        
+
                 state = State::SendingAddUserReq;
             }
             State::SendingAddUserReq => {
