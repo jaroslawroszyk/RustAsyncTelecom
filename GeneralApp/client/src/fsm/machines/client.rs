@@ -9,16 +9,6 @@ use crate::fsm::initialize_client;
 use crate::fsm::state::State;
 use crate::fsm::{send_heartbeat_request, sending_add_user_req};
 
-// fn build_message(user_id: u32) -> SomeMsg {
-//     let mut msg = SomeMsg::new();
-//     let req = msg.mut_add_user_req();
-
-//     req.user_id = user_id;
-//     req.user_name = "panicName".into();
-
-//     msg
-// }
-
 fn build_message(user_id: u32, user_name: &str) -> SomeMsg {
     let mut msg = SomeMsg::new();
     let req = msg.mut_add_user_req();
@@ -29,10 +19,6 @@ fn build_message(user_id: u32, user_name: &str) -> SomeMsg {
     msg
 }
 
-// fn generate_messages() -> Vec<SomeMsg> {
-//     let user_ids = 1..=10;
-//     user_ids.map(build_message).collect()
-// }
 fn generate_messages() -> Vec<SomeMsg> {
     let user_ids = 1..=10;
     let user_names = vec!["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack"];
