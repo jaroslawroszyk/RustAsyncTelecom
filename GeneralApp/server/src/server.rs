@@ -60,6 +60,15 @@ impl Server {
                             socket.send(&identity, SNDMORE).unwrap();
                             socket.send(serialized_build_add_user_resp, 0)?;
                         }
+                        Some(operation_message::Msgtype::FooReq(ref msg)) => {
+                            println!("Received message: FooReq {{{msg}}}");
+                            let build_foo_response = build_foo_response(msg);
+                            let serialized_build_foo_response =
+                                serialize_message(&build_foo_response);
+                            println!("Send to the client message: add_user_resp {{{build_foo_response}}}");
+                            socket.send(&identity, SNDMORE).unwrap();
+                            socket.send(serialized_build_foo_response, 0)?;
+                        }
                         _ => eprintln!("Received unsupported message: {msg}"),
                     }
                 }
@@ -94,6 +103,14 @@ fn build_add_user_response(add_user_req: &AddUserReq) -> OperationMessage {
     let req = msg.mut_add_user_resp();
     req.user_id = add_user_req.user_id;
     req.user_name = format!("OK RECEIVED for {}", add_user_req.user_name);
+
+    msg
+}
+
+fn build_foo_response(foo_req: &FooReq) -> OperationMessage {
+    let mut msg = OperationMessage::new();
+    let req = msg.mut_foo_resp();
+    req.user_name = format!("OK RECEIVED for {}", foo_req.user_name);
 
     msg
 }

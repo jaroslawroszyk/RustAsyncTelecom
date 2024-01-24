@@ -2,6 +2,14 @@ syntax = "proto3";
 
 package itf;
 
+message HeartbeatReq {
+    string message = 1;
+}
+
+message HeartbeatResp {
+    string message = 1;
+}
+
 message AddUserReq {
     uint32 user_id = 1;
     string user_name = 2;
@@ -12,12 +20,13 @@ message AddUserResp {
     string user_name = 2;
 }
 
-message HeartbeatReq {
-    string message = 1;
+//tmp msgs
+message FooReq {
+    string user_name = 1;
 }
 
-message HeartbeatResp {
-    string message = 1;
+message FooResp {
+    string user_name = 1;
 }
 
 message OperationMessage {
@@ -26,5 +35,7 @@ message OperationMessage {
         HeartbeatResp HeartbeatResp = 2;
         AddUserReq add_user_req = 3;
         AddUserResp add_user_resp = 4; 
+        FooReq foo_req = 5;
+        FooResp foo_resp = 6;
     }
 }
