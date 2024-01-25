@@ -6,6 +6,11 @@ use protobuf::Message;
 use tokio::net::TcpListener;
 use zmq::SNDMORE;
 
+use crate::{
+    builder::{build_add_user_response, build_foo_response, build_heartbeat_response},
+    serializers::serialize_message,
+};
+
 #[derive(Clone)]
 pub struct Server {
     context: Context,
@@ -34,6 +39,7 @@ impl Server {
             let identity: Vec<u8> = socket.recv_msg(0)?.to_vec();
             let message: Vec<u8> = socket.recv_msg(0)?.to_vec();
 
+            //TODO: should be state machine like in client
             match OperationMessage::parse_from_bytes(&message) {
                 Ok(msg) => {
                     match msg.msgtype {
@@ -81,42 +87,4 @@ impl Server {
 async fn is_port_available(port: &str) -> bool {
     let addres = dotenv!("ADDRESS");
     TcpListener::bind(format!("{addres}:{port}")).await.is_ok()
-}
-
-fn serialize_message(msg: &OperationMessage) -> Vec<u8> {
-    let mut buf: Vec<u8> = Vec::new();
-    msg.write_to_vec(&mut buf)
-        .expect("Failed to serialize message");
-    buf
-}
-
-fn build_heartbeat_response() -> OperationMessage {
-    let mut msg = OperationMessage::new();
-    let req = msg.mut_HeartbeatResp();
-    req.message = "I'M ALIVE!".into();
-
-    msg
-}
-
-fn build_add_user_response(add_user_req: &AddUserReq) -> OperationMessage {
-    let mut msg = OperationMessage::new();
-    let req = msg.mut_add_user_resp();
-    req.user_id = add_user_req.user_id;
-    req.user_name = format!("OK RECEIVED for {}", add_user_req.user_name);
-
-    msg
-}
-
-fn build_foo_response(foo_req: &FooReq) -> OperationMessage {
-    let mut msg = OperationMessage::new();
-    let req = msg.mut_foo_resp();
-    req.user_name = format!("OK RECEIVED for {}", foo_req.user_name);
-
-    msg
-}
-
-pub async fn run_server() -> Result<()> {
-    let server = Server::new().await?;
-    server.run().await?;
-    Ok(())
 }

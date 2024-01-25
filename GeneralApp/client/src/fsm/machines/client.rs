@@ -67,6 +67,9 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
     }
     Ok(())
 }
+
 /*
-TODO DODAC LOGOWANIE AUTHORYZACJE MOZE BAZA DANYCH WLECI?
+TODO
+1. ADD LOGIN AND AUTHORIZATION CAN THE DATABASE GO?
+2. maybe I can add a condition that crashed the server?
 */

@@ -1,7 +1,11 @@
 use anyhow::Result;
-use server::run_server;
+use server::server::Server;
 
-mod server;
+async fn run_server() -> Result<()> {
+    let server = Server::new().await?;
+    server.run().await?;
+    Ok(())
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
