@@ -6,4 +6,5 @@ pub enum State {
     WaitForHeartBeatResponse,
     WaitForAddUserResponse,
     WaitForFooResponse,
+    Exit,
 }
