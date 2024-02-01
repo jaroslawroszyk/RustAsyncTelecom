@@ -34,9 +34,10 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
             }
             State::SendingAddUserReq => {
                 if let Err(e) = sending_add_user_req(&socket, &mut iter).await {
-                    eprintln!("Error: {:?}", e);
+                    log::error!("Error: {:?}", e);
+
                     if let Err(e) = socket.disconnect(&dotenv!("IP_ADDRESS")) {
-                        eprintln!("Error disconnecting socket: {:?}", e);
+                        log::error!("Error disconnecting socket: {:?}", e);
                     }
                     break;
                 }

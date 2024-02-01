@@ -10,14 +10,14 @@ pub async fn handle_add_user_response(socket: &zmq::Socket) -> Result<()> {
         match OperationMessage::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
                 Some(operation_message::Msgtype::AddUserResp(_)) => {
-                    println!("Received AddUserResp from the server {{{msg}}}");
+                    log::debug!("Received AddUserResp from the server {{{msg}}}");
                 }
                 _ => {
-                    eprintln!("Received unexpected response: {:?}", msg);
+                    log::info!("Received unexpected response: {:?}", msg);
                 }
             },
             Err(e) => {
-                eprintln!("Unable to deserialize response: {:?}", e);
+                log::info!("Unable to deserialize response: {:?}", e);
             }
         }
     }

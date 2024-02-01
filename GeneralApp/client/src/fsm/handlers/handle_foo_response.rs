@@ -10,14 +10,14 @@ pub async fn handle_foo_response(socket: &zmq::Socket) -> Result<()> {
         match OperationMessage::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
                 Some(operation_message::Msgtype::FooResp(_)) => {
-                    println!("Received FooResp from the server {{{msg}}}");
+                    log::debug!("Received FooResp from the server {{{msg}}}");
                 }
                 _ => {
-                    eprintln!("Received unexpected response: {:?}", msg);
+                    log::info!("Received unexpected response: {:?}", msg);
                 }
             },
             Err(e) => {
-                eprintln!("Unable to deserialize response: {:?}", e);
+                log::info!("Unable to deserialize response: {:?}", e);
             }
         }
     }

@@ -19,7 +19,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
             Ok(msg) => {
                 match msg.msgtype {
                     Some(operation_message::Msgtype::HeartbeatReq(ref msg)) => {
-                        println!("Received message: HeartbeatReq {{{msg}}}");
+                        log::debug!("Received message: HeartbeatReq {{{msg}}}");
                         let heartbeat_msg_response = build_heartbeat_response();
                         let serialized_heartbeat_msg_response =
                             serialize_message(&heartbeat_msg_response);
@@ -30,7 +30,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                         println!("sent response for hearbeat");
                     }
                     Some(operation_message::Msgtype::AddUserReq(ref msg)) => {
-                        println!("Received message: add_user {{{msg}}}");
+                        log::debug!("Received message: add_user {{{msg}}}");
                         let build_add_user_resp = build_add_user_response(msg);
                         let serialized_build_add_user_resp =
                             serialize_message(&build_add_user_resp);
@@ -44,7 +44,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                         socket.send(serialized_build_add_user_resp, 0)?;
                     }
                     Some(operation_message::Msgtype::FooReq(ref msg)) => {
-                        println!("Received message: FooReq {{{msg}}}");
+                        log::debug!("Received message: FooReq {{{msg}}}");
                         let build_foo_response = build_foo_response(msg);
                         let serialized_build_foo_response = serialize_message(&build_foo_response);
                         println!(
@@ -53,11 +53,11 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                         socket.send(&identity, SNDMORE).unwrap();
                         socket.send(serialized_build_foo_response, 0)?;
                     }
-                    _ => eprintln!("Received unsupported message: {msg}"),
+                    _ => log::info!("Received unsupported message: {msg}"),
                 }
             }
             //TODO: add end state? but when
-            Err(e) => eprintln!("Unable to deserialize message: {e}"),
+            Err(e) => log::info!("Unable to deserialize message: {e}"),
         }
     }
 }

@@ -10,11 +10,11 @@ pub async fn send_heartbeat_request(socket: &zmq::Socket) -> Result<()> {
     let serialized_heartbeat_msg = serialize_message(&heartbeat_msg);
 
     if let Err(e) = socket.send(&serialized_heartbeat_msg, 0) {
-        eprintln!("Failed to send HeartbeatReq message. ERR: {:?}", e);
+        log::info!("Failed to send HeartbeatReq message. ERR: {:?}", e);
         return Err(e.into());
     }
 
-    println!("Sent HeartbeatReq message");
+    log::info!("Sent HeartbeatReq message");
     tokio::time::sleep(Duration::from_secs(1)).await;
 
     Ok(())

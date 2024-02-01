@@ -14,6 +14,7 @@ pub async fn run_client() -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    log::init()?;
     run_client().await?;
     Ok(())
 }

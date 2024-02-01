@@ -9,9 +9,10 @@ pub async fn initialize_client(socket: &zmq::Socket) -> Result<()> {
 
     socket.set_identity(client_id.as_bytes())?;
     match socket.connect(&dotenv!("IP_ADDRESS")) {
-        Err(e) => eprintln!("No connection to the server. Cannot send messages. ERR: {e}"),
+        Err(e) => log::info!("No connection to the server. Cannot send messages. ERR: {e}"),
         Ok(_) => {
-            println!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
+            log::info!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
+            // println!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
         }
     };
 

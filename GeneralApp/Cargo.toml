@@ -3,6 +3,9 @@ resolver = "2"
 
 members = [
     "client",
-    "server"
+    "server",
+    "lib/*"
 ]
+
+
     # "generated" zrobi tak zeby to nie musialo sie budowac
