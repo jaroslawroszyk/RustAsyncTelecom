@@ -27,7 +27,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
 
                         socket.send(&identity, SNDMORE).unwrap();
                         socket.send(serialized_heartbeat_msg_response, 0)?;
-                        println!("sent response for hearbeat");
+                        // println!("sent response for hearbeat");
                     }
                     Some(operation_message::Msgtype::AddUserReq(ref msg)) => {
                         log::debug!("Received message: add_user {{{msg}}}");

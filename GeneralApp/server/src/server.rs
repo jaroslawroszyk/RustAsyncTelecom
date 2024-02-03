@@ -27,7 +27,6 @@ impl Server {
         let socket = self.context.socket(zmq::ROUTER)?;
         socket.bind(&self.socket_address)?;
 
-        println!("Server is running and waiting for messages...");
         log::debug!("Server is running and waiting for messages...");
         run_state_machine(&socket).await?;
         Ok(())
