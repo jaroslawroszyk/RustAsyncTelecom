@@ -8,7 +8,7 @@ use crate::fsm::send_message;
 
 pub async fn sending_add_user_req(
     socket: &zmq::Socket,
-    iter: &mut impl Iterator<Item = &OperationMessage>,
+    iter: &mut impl Iterator<Item = &Envelope>,
 ) -> Result<()> {
     if let Some(message) = iter.next() {
         send_message(socket, message).await?;

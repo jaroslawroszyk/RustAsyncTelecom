@@ -12,7 +12,6 @@ pub async fn initialize_client(socket: &zmq::Socket) -> Result<()> {
         Err(e) => log::info!("No connection to the server. Cannot send messages. ERR: {e}"),
         Ok(_) => {
             log::info!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
-            // println!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
         }
     };
 

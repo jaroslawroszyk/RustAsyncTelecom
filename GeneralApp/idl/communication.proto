@@ -10,6 +10,7 @@ message HeartbeatResp {
     string message = 1;
 }
 
+//TODO: rename that!
 message AddUserReq {
     uint32 user_id = 1;
     string user_name = 2;
@@ -21,21 +22,21 @@ message AddUserResp {
 }
 
 //tmp msgs
-message FooReq {
-    string user_name = 1;
+message UserInfoRequest {
+    string username = 1;
 }
 
-message FooResp {
-    string user_name = 1;
+message UserInfoResponse {
+    string username = 1;
 }
 
-message OperationMessage {
+message Envelope {
     oneof msgtype {
         HeartbeatReq HeartbeatReq = 1;
         HeartbeatResp HeartbeatResp = 2;
         AddUserReq add_user_req = 3;
         AddUserResp add_user_resp = 4; 
-        FooReq foo_req = 5;
-        FooResp foo_resp = 6;
+        UserInfoRequest user_info_request = 5;
+        UserInfoResponse user_info_response = 6;
     }
 }

@@ -7,9 +7,9 @@ pub async fn handle_heart_beat_response(socket: &zmq::Socket) -> Result<()> {
     if socket.poll(POLLIN, 10)? != 0 {
         let resp = socket.recv_msg(0)?;
 
-        match OperationMessage::parse_from_bytes(&resp) {
+        match Envelope::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
-                Some(operation_message::Msgtype::HeartbeatResp(_)) => {
+                Some(envelope::Msgtype::HeartbeatResp(_)) => {
                     log::debug!("Received HeartbeatResp from the server {{{msg}}}");
                 }
                 _ => {

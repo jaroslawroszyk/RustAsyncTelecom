@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use crate::serializers::serialize_message;
 
-pub async fn send_message(socket: &zmq::Socket, message: &OperationMessage) -> Result<()> {
+pub async fn send_message(socket: &zmq::Socket, message: &Envelope) -> Result<()> {
     let serialized_msg = serialize_message(message);
     let _ = socket.send(&serialized_msg, 0).map_err(|e| {
         log::info!("Failed to send message. ERR: {:?}", e);

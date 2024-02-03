@@ -4,11 +4,11 @@ use dotenv_codegen::dotenv;
 use std::time::Duration;
 
 use crate::fsm::handlers::{
-    handle_add_user_response, handle_exit, handle_foo_response, handle_heart_beat_response,
+    handle_add_user_response, handle_exit, handle_heart_beat_response, handle_user_info_response,
 };
-use crate::fsm::initialize_client;
 use crate::fsm::state::State;
-use crate::fsm::{send_foo_req, send_heartbeat_request, sending_add_user_req};
+use crate::fsm::{initialize_client, send_user_info_req};
+use crate::fsm::{send_heartbeat_request, sending_add_user_req};
 use crate::msg_builder::generate_messages;
 
 pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
@@ -48,16 +48,16 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 if iter.peek().is_some() {
                     state = State::SendingAddUserReq;
                 } else {
-                    state = State::SendingFooReq;
+                    state = State::SendingUserInfoRequest;
                 }
             }
-            State::SendingFooReq => {
-                send_foo_req(&socket).await?;
+            State::SendingUserInfoRequest => {
+                send_user_info_req(&socket).await?;
                 tokio::time::sleep(Duration::from_millis(3)).await;
-                state = State::WaitForFooResponse;
+                state = State::WaitForUserInfoResponse;
             }
-            State::WaitForFooResponse => {
-                handle_foo_response(&socket).await?;
+            State::WaitForUserInfoResponse => {
+                handle_user_info_response(&socket).await?;
                 state = State::Exit;
             }
             State::Exit => {
@@ -70,7 +70,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
 }
 
 /*
-TODO
+TODO: redis?
 1. ADD LOGIN AND AUTHORIZATION CAN THE DATABASE GO?
 2. maybe I can add a condition that crashed the server?
 */

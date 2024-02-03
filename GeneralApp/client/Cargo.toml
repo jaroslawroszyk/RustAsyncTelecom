@@ -14,4 +14,4 @@ generated = { path = "../generated" }
 anyhow = "1.0.79"
 dotenv_codegen = "0.15.0"
 dotenv = "0.15.0"
-log = { path = "../lib/log" }
+log = { path = "../lib/logger" }

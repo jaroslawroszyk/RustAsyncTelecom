@@ -2,9 +2,9 @@ pub enum State {
     Initializing,
     SendingHeartbeatReq,
     SendingAddUserReq,
-    SendingFooReq,
+    SendingUserInfoRequest,
     WaitForHeartBeatResponse,
     WaitForAddUserResponse,
-    WaitForFooResponse,
+    WaitForUserInfoResponse,
     Exit,
 }

@@ -7,9 +7,9 @@ pub async fn handle_add_user_response(socket: &zmq::Socket) -> Result<()> {
     if socket.poll(POLLIN, 10)? != 0 {
         let resp = socket.recv_msg(0)?;
 
-        match OperationMessage::parse_from_bytes(&resp) {
+        match Envelope::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
-                Some(operation_message::Msgtype::AddUserResp(_)) => {
+                Some(envelope::Msgtype::AddUserResp(_)) => {
                     log::debug!("Received AddUserResp from the server {{{msg}}}");
                 }
                 _ => {

@@ -1,10 +1,10 @@
 use generated::communication::*;
 
-pub fn build_heartbeat_req_message() -> OperationMessage {
-    let mut msg = OperationMessage::new();
+pub fn build_heartbeat_req_message() -> Envelope {
+    let mut msg = Envelope::new();
     let req = msg.mut_HeartbeatReq();
 
-    req.message = "YOU ALIVE?".into();
+    req.message = "HEARTBEAT PING".into();
 
     msg
 }

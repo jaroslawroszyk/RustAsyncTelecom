@@ -25,9 +25,10 @@ impl Server {
 
     pub async fn run(&self) -> Result<()> {
         let socket = self.context.socket(zmq::ROUTER)?;
-        socket.bind(&self.socket_address)?;
+        // socket.bind(&self.socket_address)?;
+        assert!(socket.bind(&self.socket_address).is_ok());
 
-        log::debug!("Server is running and waiting for messages...");
+        log::info!("Server is running and waiting for messages...");
         run_state_machine(&socket).await?;
         Ok(())
     }
