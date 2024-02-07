@@ -1,6 +1,7 @@
 use anyhow::Result;
 use async_zmq::zmq;
 use dotenv_codegen::dotenv;
+use std::process::exit;
 use std::time::Duration;
 
 use crate::fsm::handlers::{
@@ -29,8 +30,13 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 state = State::WaitForHeartBeatResponse;
             }
             State::WaitForHeartBeatResponse => {
-                handle_heart_beat_response(&socket).await?;
-                state = State::SendingAddUserReq;
+                match handle_heart_beat_response(&socket).await {
+                    Ok(_) => state = State::SendingAddUserReq,
+                    Err(e) => {
+                        log::error!("{:?}", e);
+                        state = State::Exit;
+                    }
+                }
             }
             State::SendingAddUserReq => {
                 if let Err(e) = sending_add_user_req(&socket, &mut iter).await {
@@ -61,8 +67,9 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 state = State::Exit;
             }
             State::Exit => {
+                println!("jarek exit");
                 handle_exit(&socket).await?;
-                break;
+                exit(0)
             }
         }
     }
