@@ -1,6 +1,8 @@
 pub mod build_heartbeat_req_message;
 pub mod build_message_add_user_req;
+pub mod build_system_time_req;
 pub mod build_user_info_req;
 pub use build_heartbeat_req_message::build_heartbeat_req_message;
 pub use build_message_add_user_req::generate_messages;
+pub use build_system_time_req::build_system_time_req;
 pub use build_user_info_req::build_user_info_req;

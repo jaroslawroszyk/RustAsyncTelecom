@@ -30,6 +30,12 @@ message UserInfoResponse {
     string username = 1;
 }
 
+message SystemTimeReq {}
+
+message SystemTimeResp {
+    string current_time = 1;
+}
+
 message Envelope {
     oneof msgtype {
         HeartbeatReq HeartbeatReq = 1;
@@ -38,5 +44,7 @@ message Envelope {
         AddUserResp add_user_resp = 4; 
         UserInfoRequest user_info_request = 5;
         UserInfoResponse user_info_response = 6;
+        SystemTimeReq system_time_req = 7;
+        SystemTimeResp system_time_resp = 8;
     }
 }

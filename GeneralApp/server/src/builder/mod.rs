@@ -1,6 +1,8 @@
 pub mod build_add_user_response;
 pub mod build_heartbeat_response;
+pub mod build_system_time_response;
 pub mod build_user_info_response;
 pub use build_add_user_response::build_add_user_response;
 pub use build_heartbeat_response::build_heartbeat_response;
+pub use build_system_time_response::build_system_time_response;
 pub use build_user_info_response::build_user_info_response;

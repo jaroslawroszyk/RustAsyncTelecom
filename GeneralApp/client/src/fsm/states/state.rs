@@ -3,8 +3,10 @@ pub enum State {
     SendingHeartbeatReq,
     SendingAddUserReq,
     SendingUserInfoRequest,
+    SendSystemTimeReq,
     WaitForHeartBeatResponse,
     WaitForAddUserResponse,
     WaitForUserInfoResponse,
+    WaitForSystemTimeResp,
     Exit,
 }

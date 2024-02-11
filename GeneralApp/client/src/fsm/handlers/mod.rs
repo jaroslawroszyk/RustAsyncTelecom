@@ -1,8 +1,10 @@
 pub mod handle_add_user_response;
 pub mod handle_exit;
 pub mod handle_heart_beat_response;
+pub mod handle_system_time_response;
 pub mod handle_user_info_response;
 pub use handle_add_user_response::handle_add_user_response;
 pub use handle_exit::handle_exit;
 pub use handle_heart_beat_response::handle_heart_beat_response;
+pub use handle_system_time_response::handle_system_time_response;
 pub use handle_user_info_response::handle_user_info_response;
