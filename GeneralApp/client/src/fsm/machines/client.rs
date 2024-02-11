@@ -67,7 +67,6 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 state = State::Exit;
             }
             State::Exit => {
-                println!("jarek exit");
                 handle_exit(&socket).await?;
                 exit(0)
             }

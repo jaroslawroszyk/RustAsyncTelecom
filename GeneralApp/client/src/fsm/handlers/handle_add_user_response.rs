@@ -1,7 +1,17 @@
 use anyhow::Result;
+
 use async_zmq::zmq::{self, POLLIN};
 use generated::communication::*;
 use protobuf::Message;
+
+// #[derive(Debug, Clone)]
+// struct AddUserRespException {}
+
+// impl fmt::Display for AddUserRespException {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         write!(f, "AddUserRespException occurs")
+//     }
+// }
 
 pub async fn handle_add_user_response(socket: &zmq::Socket) -> Result<()> {
     if socket.poll(POLLIN, 10)? != 0 {
@@ -23,4 +33,5 @@ pub async fn handle_add_user_response(socket: &zmq::Socket) -> Result<()> {
     }
 
     Ok(())
+    // bail!(AddUserRespException{});
 }
