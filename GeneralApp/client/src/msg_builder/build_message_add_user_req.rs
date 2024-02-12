@@ -11,7 +11,7 @@ fn build_message_add_user_req(user_id: u32, user_name: &str) -> Envelope {
 }
 
 pub fn generate_messages() -> Vec<Envelope> {
-    let user_ids = 1..= 3;
+    let user_ids = 1..=3;
     let user_names = vec![
         "Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack",
     ];
