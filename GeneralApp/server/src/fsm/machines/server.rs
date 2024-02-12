@@ -2,6 +2,7 @@ use anyhow::Result;
 use async_zmq::zmq;
 use generated::communication::*;
 use protobuf::Message;
+use redis::Commands;
 use zmq::SNDMORE;
 
 use crate::{
@@ -12,7 +13,10 @@ use crate::{
     serializers::serialize_message,
 };
 
-pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
+pub async fn run_state_machine(
+    socket: &zmq::Socket,
+    redis_client: &mut redis::Connection,
+) -> Result<()> {
     loop {
         let identity: Vec<u8> = socket.recv_msg(0)?.to_vec();
         let message: Vec<u8> = socket.recv_msg(0)?.to_vec();
@@ -24,7 +28,6 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                     let heartbeat_msg_response = build_heartbeat_response();
                     let serialized_heartbeat_msg_response =
                         serialize_message(&heartbeat_msg_response);
-
                     socket.send(&identity, SNDMORE).unwrap();
                     socket.send(serialized_heartbeat_msg_response, 0)?;
                 }
@@ -33,18 +36,19 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                     let build_add_user_resp = build_add_user_response(msg);
                     let serialized_build_add_user_resp = serialize_message(&build_add_user_resp);
                     println!("Send to the client message: add_user_resp {{{build_add_user_resp}}}");
-
+                    let _: () = redis_client.incr("user_counter", 1)?;
                     socket.send(&identity, SNDMORE).unwrap();
-                    socket.send(serialized_build_add_user_resp, 0)?;
+                    socket.send(serialized_build_add_user_resp.clone(), 0)?;
+
+                    let user_counter: i32 = redis_client.get("user_counter")?; //TODO: decrement user_counter when msg deleteUser arrives
+                    log::info!("Value of user_counter: {}", user_counter);
                 }
                 Some(envelope::Msgtype::UserInfoRequest(ref msg)) => {
                     log::debug!("Received message: UserInfoRequest {{{msg}}}");
                     let build_user_info_response = build_user_info_response(msg);
                     let serialized_build_build_user_info_response =
                         serialize_message(&build_user_info_response);
-                    println!(
-                            "Send to the client message: UserInfoRequest {{{build_user_info_response}}}"
-                        );
+                    println!("Send to the client message: UserInfoRequest {{{build_user_info_response}}}");
                     socket.send(&identity, SNDMORE).unwrap();
                     socket.send(serialized_build_build_user_info_response, 0)?;
                 }
@@ -53,9 +57,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                     let build_system_time_response = build_system_time_response();
                     let serialized_build_system_time_response =
                         serialize_message(&build_system_time_response);
-                    println!(
-                            "Send to the client message: UserInfoRequest {{{build_system_time_response}}}"
-                        );
+                    println!("Send to the client message: UserInfoRequest {{{build_system_time_response}}}");
                     socket.send(&identity, SNDMORE).unwrap();
                     socket.send(serialized_build_system_time_response, 0)?;
                 }
