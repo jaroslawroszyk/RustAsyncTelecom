@@ -111,7 +111,6 @@ pub async fn run_state_machine(
                     _ = send(
                         &socket,
                         build_user_info_response(
-                            msg,
                             username_from_db,
                             generated::communication::Result::OK,
                         ),

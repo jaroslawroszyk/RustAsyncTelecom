@@ -6,11 +6,3 @@ impl std::fmt::Display for SystemTimeResponseError {
         write!(f, "Failed to handle system time response")
     }
 }
-
-impl std::error::Error for SystemTimeResponseError {}
-
-impl From<async_zmq::Error> for SystemTimeResponseError {
-    fn from(_: async_zmq::Error) -> Self {
-        SystemTimeResponseError
-    }
-}

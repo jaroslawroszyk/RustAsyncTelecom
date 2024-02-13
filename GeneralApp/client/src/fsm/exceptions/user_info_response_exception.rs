@@ -6,11 +6,3 @@ impl std::fmt::Display for UserInfoResponseError {
         write!(f, "Failed to handle user info response")
     }
 }
-
-impl std::error::Error for UserInfoResponseError {}
-
-impl From<async_zmq::Error> for UserInfoResponseError {
-    fn from(_: async_zmq::Error) -> Self {
-        UserInfoResponseError
-    }
-}
