@@ -74,7 +74,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 }
             },
             State::SendingUserInfoRequest => {
-                send(&socket, &build_user_info_req()).await?;
+                send(&socket, &build_user_info_req(2, "Bob")).await?;
 
                 tokio::time::sleep(Duration::from_millis(3)).await;
                 state = State::WaitForUserInfoResponse;

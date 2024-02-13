@@ -105,10 +105,16 @@ pub async fn run_state_machine(
                 Some(envelope::Msgtype::UserInfoRequest(ref msg)) => {
                     // TODO: read things from redis and send what the client requested
                     log::debug!("Received message: UserInfoRequest {{{msg}}}");
-
+                    let username_from_db: String = redis_state_manager
+                        .get(USERS_NS, &msg.user_id.to_string())
+                        .await?;
                     _ = send(
                         &socket,
-                        build_user_info_response(msg, generated::communication::Result::OK),
+                        build_user_info_response(
+                            msg,
+                            username_from_db,
+                            generated::communication::Result::OK,
+                        ),
                         &identity,
                     );
                 }

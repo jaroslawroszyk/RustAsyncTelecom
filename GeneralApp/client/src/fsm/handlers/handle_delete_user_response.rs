@@ -17,7 +17,12 @@ pub async fn handle_delete_user_response(
             Ok(msg) => match msg.msgtype {
                 Some(envelope::Msgtype::DeleteUserResponse(resp)) => {
                     log::debug!("Received DeleteUserResponse from the server {{{resp}}}");
-                    log::info!("Full: DeleteUserResponse {:?}", resp.result);
+                    log::info!(
+                        "Full: DeleteUserResponse: userId: {} username: {} result: {:?}",
+                        resp.user_id,
+                        resp.username,
+                        resp.result
+                    );
                 }
                 _ => {
                     log::warn!("Received unexpected response: {:?}", msg);

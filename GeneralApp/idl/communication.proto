@@ -41,7 +41,8 @@ message DeleteUserResponse {
 
 //Change that msg to send from redis info about that user
 message UserInfoRequest {
-    string username = 1;
+    uint32 user_id = 1;
+    string username = 2;
 }
 
 message UserInfoResponse {
