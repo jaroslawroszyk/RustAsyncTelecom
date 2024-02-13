@@ -3,9 +3,13 @@ use async_zmq::zmq::{self, POLLIN};
 use generated::communication::*;
 use protobuf::Message;
 
-pub async fn handle_user_info_response(socket: &zmq::Socket) -> Result<()> {
-    if socket.poll(POLLIN, 10)? != 0 {
-        let resp = socket.recv_msg(0)?;
+use crate::fsm::exceptions::user_info_response_exception::UserInfoResponseError;
+
+pub async fn handle_user_info_response(socket: &zmq::Socket) -> Result<(), UserInfoResponseError> {
+    if socket.poll(POLLIN, 10) != Ok(0) {
+        let Ok(resp) = socket.recv_msg(0) else {
+            return Err(UserInfoResponseError {});
+        };
 
         match Envelope::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
@@ -18,6 +22,7 @@ pub async fn handle_user_info_response(socket: &zmq::Socket) -> Result<()> {
             },
             Err(e) => {
                 log::info!("Unable to deserialize response: {:?}", e);
+                return Err(UserInfoResponseError);
             }
         }
     }

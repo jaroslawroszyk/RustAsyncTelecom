@@ -20,13 +20,15 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
 
     loop {
         match state {
-            State::Initializing => {
-                initialize_client(&socket).await?;
-                state = State::SendingHeartbeatReq;
-            }
+            State::Initializing => match initialize_client(&socket).await {
+                Ok(_) => state = State::SendingHeartbeatReq,
+                Err(e) => {
+                    log::error!("{:?}", e);
+                    state = State::Exit;
+                }
+            },
             State::SendingHeartbeatReq => {
                 send(&socket, &build_heartbeat_req_message()).await?;
-
                 state = State::WaitForHeartBeatResponse;
             }
             State::WaitForHeartBeatResponse => match handle_heart_beat_response(&socket).await {
@@ -53,36 +55,48 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                     State::SendingDeleteUserRequest
                 }
             }
-            State::WaitForAddUserResponse => {
-                handle_add_user_response(&socket).await?;
-                state = State::SendingAddUserReq;
-            }
+            State::WaitForAddUserResponse => match handle_add_user_response(&socket).await {
+                Ok(_) => state = State::SendingAddUserReq,
+                Err(e) => {
+                    log::error!("{:?}", e);
+                    state = State::Exit;
+                }
+            },
             State::SendingDeleteUserRequest => {
                 send(&socket, &build_delete_user_req()).await?;
                 state = State::WaitForDeleteUserResponse;
             }
-            State::WaitForDeleteUserResponse => {
-                handle_delete_user_response(&socket).await?;
-                state = State::SendingUserInfoRequest;
-            }
+            State::WaitForDeleteUserResponse => match handle_delete_user_response(&socket).await {
+                Ok(_) => state = State::SendingUserInfoRequest,
+                Err(e) => {
+                    log::error!("{:?}", e);
+                    state = State::Exit;
+                }
+            },
             State::SendingUserInfoRequest => {
                 send(&socket, &build_user_info_req()).await?;
 
                 tokio::time::sleep(Duration::from_millis(3)).await;
                 state = State::WaitForUserInfoResponse;
             }
-            State::WaitForUserInfoResponse => {
-                handle_user_info_response(&socket).await?;
-                state = State::SendSystemTimeReq;
-            }
+            State::WaitForUserInfoResponse => match handle_user_info_response(&socket).await {
+                Ok(_) => state = State::SendSystemTimeReq,
+                Err(e) => {
+                    log::error!("{:?}", e);
+                    state = State::Exit;
+                }
+            },
             State::SendSystemTimeReq => {
                 send(&socket, &build_system_time_req()).await?;
                 state = State::WaitForSystemTimeResp;
             }
-            State::WaitForSystemTimeResp => {
-                handle_system_time_response(&socket).await?;
-                state = State::Exit;
-            }
+            State::WaitForSystemTimeResp => match handle_system_time_response(&socket).await {
+                Ok(_) => state = State::Exit, // XDD
+                Err(e) => {
+                    log::error!("{:?}", e);
+                    state = State::Exit;
+                }
+            },
             State::Exit => {
                 handle_exit(&socket).await?;
                 break;
