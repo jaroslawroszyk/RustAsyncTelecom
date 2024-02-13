@@ -1,0 +1,76 @@
+use anyhow::Result;
+use redis::Commands;
+
+const APP_STATE_NS: &str = "app_state_counter";
+pub const USERS_NS: &str = "Users";
+pub const HEARTBEAT_NS: &str = "HeartbeatReqCounter";
+
+#[derive(Clone)]
+pub struct RedisStateManager {
+    client: redis::Client,
+}
+
+impl RedisStateManager {
+    pub async fn new() -> Result<Self> {
+        let redis_client = redis::Client::open("redis://127.0.0.1/")?;
+        Ok(Self {
+            client: redis_client,
+        })
+    }
+
+    pub async fn set(&mut self, namespace: &str, key: &str, value: &str) -> Result<()> {
+        let mut con = self.client.get_connection()?;
+        con.hset(namespace, key, value)?;
+        Ok(())
+    }
+
+    pub async fn get(&mut self, namespace: &str, key: &str) -> Result<String> {
+        let mut con: redis::Connection = self.client.get_connection()?;
+        let result = con.hget(namespace, key)?;
+        Ok(result)
+    }
+
+    pub async fn reset_counter(&mut self, namespace: &str) -> Result<()> {
+        self.set_counter(namespace, 0).await
+    }
+
+    pub async fn restore_state(&mut self) -> Result<()> {
+        let mut con = self.client.get_connection()?;
+        let counter: i32 = con.get(APP_STATE_NS)?;
+        self.set_counter("*", counter).await?; // its works?
+        Ok(())
+    }
+
+    pub async fn save_state(&mut self, counter: i32) -> Result<()> {
+        self.set_counter("*", counter).await
+    }
+
+    pub async fn increment_counter(&mut self, key: &str) -> Result<()> {
+        let mut con = self.client.get_connection()?;
+        let _: () = con.incr(key, 1)?;
+        Ok(())
+    }
+
+    pub async fn set_counter(&mut self, namespace: &str, data: i32) -> Result<()> {
+        let mut con = self.client.get_connection()?;
+        con.set(namespace, data)?;
+        Ok(())
+    }
+
+    pub async fn get_counter(&mut self, namespace: &str) -> Result<i32> {
+        let mut con: redis::Connection = self.client.get_connection()?;
+        let counter: i32 = con.get(namespace)?;
+        Ok(counter)
+    }
+
+    pub async fn reset_all_counters(&mut self) -> Result<()> {
+        let mut con = self.client.get_connection()?;
+        let keys: Vec<String> = con.keys("*")?;
+
+        for key in keys {
+            con.set(&key, 0)?;
+        }
+
+        Ok(())
+    }
+}

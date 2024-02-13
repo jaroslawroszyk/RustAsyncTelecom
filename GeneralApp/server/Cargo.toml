@@ -14,5 +14,6 @@ anyhow = "1.0.79"
 dotenv_codegen = "0.15.0"
 dotenv = "0.15.0"
 log = { path = "../lib/logger" }
+redis_manager = { path = "../lib/redis_manager" }
 chrono = "0.4.34"
 redis = "0.24.0"
