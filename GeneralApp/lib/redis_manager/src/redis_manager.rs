@@ -1,9 +1,8 @@
 use anyhow::Result;
+use namespace::APP_STATE_NS;
 use redis::Commands;
 
-const APP_STATE_NS: &str = "app_state_counter";
-pub const USERS_NS: &str = "Users";
-pub const HEARTBEAT_NS: &str = "HeartbeatReqCounter";
+pub mod namespace;
 
 #[derive(Clone)]
 pub struct RedisStateManager {
@@ -28,6 +27,18 @@ impl RedisStateManager {
         let mut con: redis::Connection = self.client.get_connection()?;
         let result = con.hget(namespace, key)?;
         Ok(result)
+    }
+
+    pub async fn get_all_from_ns(&mut self, namespace: &str) -> Result<Vec<String>> {
+        let mut con: redis::Connection = self.client.get_connection()?;
+        let result = con.hgetall(namespace)?;
+        Ok(result)
+    }
+
+    pub async fn delete(&mut self, namespace: &str, key: &str) -> Result<()> {
+        let mut con = self.client.get_connection()?;
+        con.hdel(namespace, key)?;
+        Ok(())
     }
 
     pub async fn reset_counter(&mut self, namespace: &str) -> Result<()> {

@@ -1,4 +1,5 @@
 pub mod initialize_client;
+pub mod send_delete_user_request;
 pub mod send_heartbeat_request;
 pub mod send_message;
 pub mod send_system_time_req;

@@ -2,17 +2,20 @@ use anyhow::Result;
 use async_zmq::zmq;
 use generated::communication::*;
 use protobuf::Message;
-use redis_manager::{RedisStateManager, HEARTBEAT_NS, USERS_NS};
+use redis_manager::{namespace::*, RedisStateManager};
 use zmq::SNDMORE;
 
 use crate::{
     builder::{
-        build_add_user_response, build_heartbeat_response, build_system_time_response,
-        build_user_info_response,
+        build_add_user_response, build_delete_user_response, build_heartbeat_response,
+        build_system_time_response, build_user_info_response,
     },
     serializers::serialize_message,
-    // server::RedisStateManager,
 };
+
+// struct UserConfig{
+
+// }
 
 pub async fn run_state_machine(
     socket: &zmq::Socket,
@@ -60,6 +63,42 @@ pub async fn run_state_machine(
                             .get(USERS_NS, &msg.user_id.to_string())
                             .await?
                     );
+                }
+                Some(envelope::Msgtype::DeleteUserRequest(ref msg)) => {
+                    log::debug!("Received message: DeleteUserRequest {{{msg}}}");
+
+                    let build_delete_user_resp = build_delete_user_response(msg);
+                    let serialize_build_delete_user_resp =
+                        serialize_message(&build_delete_user_resp);
+                    println!(
+                        "Send to the client message: DeleteUserResponse {{{build_delete_user_resp}}}"
+                    );
+
+                    log::info!(
+                        "Jarek before REMOVE: {} is: {:?}",
+                        msg.user_id,
+                        redis_state_manager.get_all_from_ns(USERS_NS).await?
+                    );
+
+                    let delete_user_id = msg.user_id;
+                    let delete_user_name = &msg.username;
+                    redis_state_manager
+                        .delete(USERS_NS, &delete_user_id.to_string())
+                        .await?;
+                    log::info!(
+                        "jarek delete user {} name {} from db",
+                        delete_user_id,
+                        delete_user_name
+                    );
+
+                    log::info!(
+                        "Jarek after REMOVE: {} is: {:?}",
+                        msg.user_id,
+                        redis_state_manager.get_all_from_ns(USERS_NS).await?
+                    );
+
+                    socket.send(&identity, SNDMORE).unwrap();
+                    socket.send(serialize_build_delete_user_resp.clone(), 0)?;
                 }
                 Some(envelope::Msgtype::UserInfoRequest(ref msg)) => {
                     // TODO: read things from redis and send what the client requested

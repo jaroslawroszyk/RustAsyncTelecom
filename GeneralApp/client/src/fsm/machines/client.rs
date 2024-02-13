@@ -5,11 +5,11 @@ use std::process::exit;
 use std::time::Duration;
 
 use crate::fsm::handlers::{
-    handle_add_user_response, handle_exit, handle_heart_beat_response, handle_system_time_response,
-    handle_user_info_response,
+    handle_add_user_response, handle_delete_user_response, handle_exit, handle_heart_beat_response,
+    handle_system_time_response, handle_user_info_response,
 };
 use crate::fsm::state::State;
-use crate::fsm::{initialize_client, send_user_info_req};
+use crate::fsm::{initialize_client, send_delete_user_request, send_user_info_req};
 use crate::fsm::{send_heartbeat_request, send_system_time_req, sending_add_user_req};
 use crate::msg_builder::generate_messages;
 
@@ -64,8 +64,16 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 if iter.peek().is_some() {
                     state = State::SendingAddUserReq;
                 } else {
-                    state = State::SendingUserInfoRequest;
+                    state = State::SendingDeleteUserRequest;
                 }
+            }
+            State::SendingDeleteUserRequest => {
+                send_delete_user_request(&socket).await?;
+                state = State::WaitForDeleteUserResponse;
+            }
+            State::WaitForDeleteUserResponse => {
+                handle_delete_user_response(&socket).await?;
+                state = State::SendingUserInfoRequest;
             }
             State::SendingUserInfoRequest => {
                 send_user_info_req(&socket).await?;
