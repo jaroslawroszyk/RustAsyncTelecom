@@ -9,8 +9,9 @@ pub async fn handle_delete_user_response(socket: &zmq::Socket) -> Result<()> {
 
         match Envelope::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
-                Some(envelope::Msgtype::DeleteUserResponse(_)) => {
-                    log::debug!("Received DeleteUserResponse from the server {{{msg}}}");
+                Some(envelope::Msgtype::DeleteUserResponse(resp)) => {
+                    log::debug!("Received DeleteUserResponse from the server {{{resp}}}");
+                    log::info!("Full: DeleteUserResponse {:?}", resp.result)
                 }
                 _ => {
                     log::info!("Received unexpected response: {:?}", msg);

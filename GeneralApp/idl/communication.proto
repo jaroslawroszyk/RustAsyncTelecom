@@ -2,6 +2,11 @@ syntax = "proto3";
 
 package itf;
 
+enum Result {
+    OK = 0;
+    ERR = 1;
+}
+
 message HeartbeatReq {
     string message = 1;
 }
@@ -29,6 +34,7 @@ message DeleteUserRequest {
 message DeleteUserResponse {
     uint32 user_id = 1;
     string username = 2;
+    Result result = 3;
 }
 
 //Change that msg to send from redis info about that user
