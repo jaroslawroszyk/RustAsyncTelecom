@@ -75,22 +75,35 @@ pub async fn run_state_machine(
                     );
 
                     let delete_user_id = msg.user_id;
-                    let delete_user_name = &msg.username;
+                    // let delete_user_name = &msg.username;
+
+                    let get_from_redis = redis_state_manager
+                        .get(USERS_NS, &delete_user_id.to_string())
+                        .await;
                     let result_reids_call = redis_state_manager
                         .delete(USERS_NS, &delete_user_id.to_string())
                         .await;
                     let response = match result_reids_call {
                         Ok(_) => {
+                            let user_name = get_from_redis.unwrap();
                             log::debug!(
                                 "Delete user: {} name :{} from db",
                                 delete_user_id,
-                                delete_user_name
+                                user_name
                             );
-                            build_delete_user_response(msg, generated::communication::Result::OK)
+                            build_delete_user_response(
+                                msg,
+                                &user_name,
+                                generated::communication::Result::OK,
+                            )
                         }
                         Err(_) => {
                             log::error!("nie udalo sie i co mi zrobisz?");
-                            build_delete_user_response(msg, generated::communication::Result::ERR)
+                            build_delete_user_response(
+                                msg,
+                                "NULL",
+                                generated::communication::Result::ERR,
+                            )
                         }
                     };
 
@@ -105,17 +118,20 @@ pub async fn run_state_machine(
                 Some(envelope::Msgtype::UserInfoRequest(ref msg)) => {
                     // TODO: read things from redis and send what the client requested
                     log::debug!("Received message: UserInfoRequest {{{msg}}}");
-                    let username_from_db: String = redis_state_manager
+                    let username_from_db = redis_state_manager
                         .get(USERS_NS, &msg.user_id.to_string())
-                        .await?;
-                    _ = send(
-                        &socket,
-                        build_user_info_response(
-                            username_from_db,
-                            generated::communication::Result::OK,
+                        .await;
+
+                    let response = match username_from_db {
+                        Ok(username) => {
+                            build_user_info_response(username, generated::communication::Result::OK)
+                        }
+                        Err(_) => build_user_info_response(
+                            "NULL".to_string(),
+                            generated::communication::Result::ERR,
                         ),
-                        &identity,
-                    );
+                    };
+                    _ = send(&socket, response, &identity);
                 }
                 Some(envelope::Msgtype::SystemTimeReq(_)) => {
                     log::debug!("Received message: SystemTimeRequest");

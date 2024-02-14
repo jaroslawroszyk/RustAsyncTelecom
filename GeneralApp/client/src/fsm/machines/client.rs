@@ -1,6 +1,6 @@
 use anyhow::Result;
 use async_zmq::zmq;
-use std::time::Duration;
+use rand::Rng;
 
 use crate::fsm::handlers::{
     handle_add_user_response, handle_delete_user_response, handle_exit, handle_heart_beat_response,
@@ -9,14 +9,17 @@ use crate::fsm::handlers::{
 use crate::fsm::state::State;
 use crate::fsm::{initialize_client, send};
 use crate::msg_builder::{
-    build_delete_user_req, build_heartbeat_req_message, build_system_time_req, build_user_info_req,
-    generate_messages,
+    build_delete_user_req, build_heartbeat_req_message, build_system_time_req,
+    generate_messages_add_user_req, generate_messages_user_info_req,
 };
 
 pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
     let mut state = State::Initializing;
-    let messages = generate_messages();
-    let mut iter = messages.iter().peekable();
+    let user_ids = 1..5;
+    let add_user_req_msg = generate_messages_add_user_req(user_ids.clone());
+    let user_info_req_msg = generate_messages_user_info_req(user_ids.clone());
+    let mut iter_add_user_req = add_user_req_msg.iter().peekable();
+    let mut iter_user_info_req = user_info_req_msg.iter().peekable();
 
     loop {
         match state {
@@ -39,13 +42,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 }
             },
             State::SendingAddUserReq => {
-                /*
-                TODO:
-                Jak bede mial tych userow to klient bedzie mogl prosic o losowego id w wiadomosci SendingUserInfoRequest.
-                a ta wiadomosc powinna powiedziec hej, to user "Jarek" o id "69"
-                te requesty o SendingUserInfoRequest powinny byc co jakis czas.
-                */
-                state = if let Some(msg) = iter.next() {
+                state = if let Some(msg) = iter_add_user_req.next() {
                     if send(&socket, msg).await.is_err() {
                         State::Exit
                     } else {
@@ -63,7 +60,10 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 }
             },
             State::SendingDeleteUserRequest => {
-                send(&socket, &build_delete_user_req()).await?;
+                let mut rng = rand::thread_rng();
+                let random_ue = rng.gen_range(user_ids.clone());
+
+                send(&socket, &build_delete_user_req(random_ue)).await?;
                 state = State::WaitForDeleteUserResponse;
             }
             State::WaitForDeleteUserResponse => match handle_delete_user_response(&socket).await {
@@ -74,13 +74,18 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 }
             },
             State::SendingUserInfoRequest => {
-                send(&socket, &build_user_info_req(2, "Bob")).await?;
-
-                tokio::time::sleep(Duration::from_millis(3)).await;
-                state = State::WaitForUserInfoResponse;
+                state = if let Some(msg) = iter_user_info_req.next() {
+                    if send(&socket, msg).await.is_err() {
+                        State::Exit
+                    } else {
+                        State::WaitForUserInfoResponse
+                    }
+                } else {
+                    State::SendSystemTimeReq
+                }
             }
             State::WaitForUserInfoResponse => match handle_user_info_response(&socket).await {
-                Ok(_) => state = State::SendSystemTimeReq,
+                Ok(_) => state = State::SendingUserInfoRequest,
                 Err(e) => {
                     log::error!("{:?}", e);
                     state = State::Exit;
@@ -91,7 +96,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 state = State::WaitForSystemTimeResp;
             }
             State::WaitForSystemTimeResp => match handle_system_time_response(&socket).await {
-                Ok(_) => state = State::Exit, // XDD
+                Ok(_) => state = State::Exit,
                 Err(e) => {
                     log::error!("{:?}", e);
                     state = State::Exit;
@@ -105,7 +110,3 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
     }
     Ok(())
 }
-
-/*
-TODO: 2 - add proper error handling
-*/

@@ -16,9 +16,8 @@ pub async fn handle_delete_user_response(
         match Envelope::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
                 Some(envelope::Msgtype::DeleteUserResponse(resp)) => {
-                    log::debug!("Received DeleteUserResponse from the server {{{resp}}}");
-                    log::info!(
-                        "Full: DeleteUserResponse: userId: {} username: {} result: {:?}",
+                    log::debug!(
+                        "Received: DeleteUserResponse: userId: {} name: {} result: {:?}",
                         resp.user_id,
                         resp.username,
                         resp.result

@@ -17,6 +17,3 @@ async fn main() -> Result<()> {
     run_client().await?;
     Ok(())
 }
-/*
-TODO: jezeli nie przyjdzie resposne na heartbeat to zamknij gniazdo! (TIMEOUT?)
-*/

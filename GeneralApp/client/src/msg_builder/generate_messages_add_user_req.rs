@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use generated::communication::*;
 
 fn build_message_add_user_req(user_id: u32, user_name: &str) -> Envelope {
@@ -10,14 +12,12 @@ fn build_message_add_user_req(user_id: u32, user_name: &str) -> Envelope {
     msg
 }
 
-pub fn generate_messages() -> Vec<Envelope> {
-    let user_ids = 1..=3;
+pub fn generate_messages_add_user_req(ids: Range<u32>) -> Vec<Envelope> {
     let user_names = vec![
         "Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack",
     ];
 
-    user_ids
-        .zip(user_names.into_iter())
+    ids.zip(user_names.into_iter().cycle())
         .map(|(id, name)| build_message_add_user_req(id, name))
         .collect()
 }

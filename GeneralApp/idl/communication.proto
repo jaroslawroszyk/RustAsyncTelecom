@@ -16,7 +16,6 @@ message HeartbeatResp {
     Result result = 2;
 }
 
-//TODO: rename that!
 message AddUserReq {
     uint32 user_id = 1;
     string user_name = 2;
@@ -39,10 +38,8 @@ message DeleteUserResponse {
     Result result = 3;
 }
 
-//Change that msg to send from redis info about that user
 message UserInfoRequest {
     uint32 user_id = 1;
-    string username = 2;
 }
 
 message UserInfoResponse {
