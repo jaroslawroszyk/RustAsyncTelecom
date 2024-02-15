@@ -21,7 +21,6 @@ impl Server {
         }
 
         let mut redis_state_manager = RedisStateManager::new().await?;
-        // redis_state_manager.reset_all_counters().await?;
         redis_state_manager
             .set_counter("app_state_counter", 0)
             .await?;

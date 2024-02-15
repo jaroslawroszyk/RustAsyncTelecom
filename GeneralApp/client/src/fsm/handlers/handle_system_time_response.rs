@@ -3,14 +3,12 @@ use async_zmq::zmq::{self, POLLIN};
 use generated::communication::*;
 use protobuf::Message;
 
-use crate::fsm::exceptions::system_time_response_exception::SystemTimeResponseError;
+use crate::fsm::exceptions::exceptions::ResponseError;
 
-pub async fn handle_system_time_response(
-    socket: &zmq::Socket,
-) -> Result<(), SystemTimeResponseError> {
+pub async fn handle_system_time_response(socket: &zmq::Socket) -> Result<(), ResponseError> {
     if socket.poll(POLLIN, 10) != Ok(0) {
         let Ok(resp) = socket.recv_msg(0) else {
-            return Err(SystemTimeResponseError {});
+            return Err(ResponseError::SystemTimeResponseError);
         };
 
         match Envelope::parse_from_bytes(&resp) {
@@ -24,7 +22,7 @@ pub async fn handle_system_time_response(
             },
             Err(e) => {
                 log::info!("Unable to deserialize response: {:?}", e);
-                return Err(SystemTimeResponseError);
+                return Err(ResponseError::SystemTimeResponseError);
             }
         }
     }

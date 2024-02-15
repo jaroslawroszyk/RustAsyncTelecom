@@ -1,17 +1,18 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use async_zmq::zmq::{self, POLLIN};
 use generated::communication::*;
 use protobuf::Message;
 
-use crate::fsm::exceptions::heart_beat_exception::HeartBeatException;
+use crate::fsm::exceptions::exceptions::ResponseError;
 
-pub async fn handle_heart_beat_response(socket: &zmq::Socket) -> Result<()> {
-    //todo implement custom erros
+pub async fn handle_heart_beat_response(socket: &zmq::Socket) -> Result<(), ResponseError> {
     let mut retries: i8 = 3;
 
     while retries > 0 {
-        if socket.poll(POLLIN, 1000)? != 0 {
-            let resp = socket.recv_msg(0)?;
+        if socket.poll(POLLIN, 1000) != Ok(0) {
+            let Ok(resp) = socket.recv_msg(0) else {
+                return Err(ResponseError::HeartBeatException);
+            };
 
             match Envelope::parse_from_bytes(&resp) {
                 Ok(msg) => match msg.msgtype {
@@ -33,5 +34,5 @@ pub async fn handle_heart_beat_response(socket: &zmq::Socket) -> Result<()> {
         log::info!("Number of retries left: {}", retries);
     }
 
-    bail!((HeartBeatException {}));
+    Ok(())
 }
