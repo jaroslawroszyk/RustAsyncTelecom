@@ -2,14 +2,11 @@ use anyhow::Result;
 use async_zmq::zmq;
 use generated::communication::*;
 use protobuf::Message;
-use redis_manager::{namespace::*, RedisStateManager};
+use redis_manager::RedisStateManager;
 
-use crate::{
-    builder::{
-        build_add_user_response, build_delete_user_response, build_heartbeat_response,
-        build_system_time_response, build_user_info_response,
-    },
-    fsm::machines::send,
+use crate::fsm::states::{
+    state_add_user_req, state_delete_user_req, state_heartbeat_req, state_system_time_req,
+    state_user_info_req,
 };
 
 pub async fn run_state_machine(
@@ -22,125 +19,20 @@ pub async fn run_state_machine(
 
         match Envelope::parse_from_bytes(&message) {
             Ok(msg) => match msg.msgtype {
-                // TODO: add an id to hearbeat and store these ids in redis
                 Some(envelope::Msgtype::HeartbeatReq(ref msg)) => {
-                    log::debug!("Received message: HeartbeatReq {{{msg}}}");
-
-                    let result_redis_call =
-                        redis_state_manager.increment_counter(HEARTBEAT_NS).await;
-                    let response = match result_redis_call {
-                        Ok(_) => {
-                            log::debug!(
-                                "Counter HEARTBEAT_NS : {}",
-                                redis_state_manager.get_counter(HEARTBEAT_NS).await?
-                            );
-                            build_heartbeat_response(generated::communication::Result::OK)
-                        }
-                        Err(_) => {
-                            log::error!("nie udalo sie i co mi zrobisz?");
-                            build_heartbeat_response(generated::communication::Result::ERR)
-                        }
-                    };
-
-                    _ = send(&socket, response, &identity);
+                    state_heartbeat_req(&socket, msg, redis_state_manager, &identity).await?;
                 }
                 Some(envelope::Msgtype::AddUserReq(ref msg)) => {
-                    log::debug!("Received message: AddUserRequest {{{msg}}}");
-
-                    _ = send(
-                        &socket,
-                        build_add_user_response(msg, generated::communication::Result::OK),
-                        &identity,
-                    );
-
-                    redis_state_manager
-                        .set(USERS_NS, &msg.user_id.to_string(), &msg.user_name)
-                        .await?;
-
-                    log::debug!(
-                        "Value for userId: {} is: {}",
-                        msg.user_id,
-                        redis_state_manager
-                            .get(USERS_NS, &msg.user_id.to_string())
-                            .await?
-                    );
+                    state_add_user_req(&socket, msg, redis_state_manager, &identity).await?;
                 }
                 Some(envelope::Msgtype::DeleteUserRequest(ref msg)) => {
-                    log::debug!("Received message: DeleteUserRequest {{{msg}}}");
-
-                    log::debug!(
-                        "DB STATE before remove user: {} name: {:?}",
-                        msg.user_id,
-                        redis_state_manager.get_all_from_ns(USERS_NS).await?
-                    );
-
-                    let delete_user_id = msg.user_id;
-                    // let delete_user_name = &msg.username;
-
-                    let get_from_redis = redis_state_manager
-                        .get(USERS_NS, &delete_user_id.to_string())
-                        .await;
-                    let result_reids_call = redis_state_manager
-                        .delete(USERS_NS, &delete_user_id.to_string())
-                        .await;
-                    let response = match result_reids_call {
-                        Ok(_) => {
-                            let user_name = get_from_redis.unwrap();
-                            log::debug!(
-                                "Delete user: {} name :{} from db",
-                                delete_user_id,
-                                user_name
-                            );
-                            build_delete_user_response(
-                                msg,
-                                &user_name,
-                                generated::communication::Result::OK,
-                            )
-                        }
-                        Err(_) => {
-                            log::error!("nie udalo sie i co mi zrobisz?");
-                            build_delete_user_response(
-                                msg,
-                                "NULL",
-                                generated::communication::Result::ERR,
-                            )
-                        }
-                    };
-
-                    _ = send(&socket, response, &identity);
-
-                    log::debug!(
-                        "Db state after REMOVE user: {} name: {:?}",
-                        msg.user_id,
-                        redis_state_manager.get_all_from_ns(USERS_NS).await?
-                    );
+                    state_delete_user_req(&socket, msg, redis_state_manager, &identity).await?;
                 }
                 Some(envelope::Msgtype::UserInfoRequest(ref msg)) => {
-                    // TODO: read things from redis and send what the client requested
-                    log::debug!("Received message: UserInfoRequest {{{msg}}}");
-                    let username_from_db = redis_state_manager
-                        .get(USERS_NS, &msg.user_id.to_string())
-                        .await;
-
-                    let response = match username_from_db {
-                        Ok(username) => {
-                            build_user_info_response(username, generated::communication::Result::OK)
-                        }
-                        Err(_) => build_user_info_response(
-                            "NULL".to_string(),
-                            generated::communication::Result::ERR,
-                        ),
-                    };
-                    _ = send(&socket, response, &identity);
+                    state_user_info_req(&socket, msg, redis_state_manager, &identity).await?;
                 }
                 Some(envelope::Msgtype::SystemTimeReq(_)) => {
-                    log::debug!("Received message: SystemTimeRequest");
-
-                    _ = send(
-                        &socket,
-                        build_system_time_response(generated::communication::Result::OK),
-                        &identity,
-                    );
+                    state_system_time_req(&socket, &identity).await?;
                 }
                 _ => log::info!("Received unsupported message: {msg}"),
             },
