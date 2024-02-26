@@ -1,6 +1,5 @@
 use std::fmt;
 
-// Definicja enuma reprezentującego różne rodzaje błędów
 #[derive(Debug)]
 pub enum ResponseError {
     AddUserRespException,

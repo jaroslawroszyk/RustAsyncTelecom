@@ -1,7 +1,6 @@
 use anyhow::{bail, Ok, Result};
 use async_zmq::{zmq, Context};
 use dotenv_codegen::dotenv;
-// use redis::Commands;
 use redis_manager::RedisStateManager;
 use tokio::net::TcpListener;
 
