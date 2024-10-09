@@ -9,8 +9,6 @@ pub fn build_delete_user_req(id: u32) -> Envelope {
     msg
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;

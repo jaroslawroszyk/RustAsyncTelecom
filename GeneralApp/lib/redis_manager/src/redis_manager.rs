@@ -48,7 +48,7 @@ impl RedisStateManager {
     pub async fn restore_state(&mut self) -> Result<()> {
         let mut con = self.client.get_connection()?;
         let counter: i32 = con.get(APP_STATE_NS)?;
-        self.set_counter("*", counter).await?; 
+        self.set_counter("*", counter).await?;
         Ok(())
     }
 
