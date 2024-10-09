@@ -6,6 +6,3 @@ members = [
     "server",
     "lib/*"
 ]
-
-
-    # "generated" zrobi tak zeby to nie musialo sie budowac
