@@ -1,28 +1,20 @@
 pub mod initialize_client_exception;
+use thiserror::Error;
 
-use std::fmt;
-
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ResponseError {
+    #[error("AddUserRespException")]
     AddUserRespException,
+    #[error("DeleteUserResponseError")]
     DeleteUserResponseError,
+    #[error("HeartBeatException")]
     HeartBeatException,
+    #[error("InitializeClientException")]
     InitalizeClientException,
+    #[error("SystemTimeResponseError")]
     SystemTimeResponseError,
+    #[error("UserInfoResponseError")]
     UserInfoResponseError,
+    #[error("Custom")]
     Custom,
-}
-
-impl fmt::Display for ResponseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ResponseError::AddUserRespException => write!(f, "AddUserRespException"),
-            ResponseError::DeleteUserResponseError => write!(f, "DeleteUserResponseError"),
-            ResponseError::HeartBeatException => write!(f, "HeartBeatException"),
-            ResponseError::InitalizeClientException => write!(f, "InitalizeClientException"),
-            ResponseError::SystemTimeResponseError => write!(f, "SystemTimeResponseError"),
-            ResponseError::UserInfoResponseError => write!(f, "UserInfoResponseError"),
-            ResponseError::Custom => write!(f, "Custom"),
-        }
-    }
 }

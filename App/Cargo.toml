@@ -27,3 +27,4 @@ redis = "0.24.0"
 redis_manager = { path = "lib/redis_manager" }
 simplelog = { version = "0.12.1", features = ["termcolor"] }
 tokio = { version = "1", features = ["full"] }
+thiserror = "2.0.18"
