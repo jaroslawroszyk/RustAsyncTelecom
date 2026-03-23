@@ -16,10 +16,12 @@ chrono = "0.4.34"
 dotenv = "0.15.0"
 dotenv_codegen = "0.15.0"
 generated = { path = "generated" }
-log = { path = "lib/logger" }
+logger = { path = "lib/logger" }
 protobuf = "3.2.0"
 protobuf-codegen = "3.2.0"
 rand = "0.8"
 redis = "0.24.0"
 redis_manager = { path = "lib/redis_manager" }
 tokio = { version = "1", features = ["full"] }
+criterion = "0.5"
+simplelog = { version = "0.12.1", features = ["termcolor"] }

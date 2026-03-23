@@ -34,9 +34,9 @@ pub async fn run_state_machine(
                 Some(envelope::Msgtype::SystemTimeReq(_)) => {
                     state_system_time_req(socket, &identity).await?;
                 }
-                _ => log::info!("Received unsupported message: {msg}"),
+                _ => logger::info!("Received unsupported message: {msg}"),
             },
-            Err(e) => log::info!("Unable to deserialize message: {e}"),
+            Err(e) => logger::info!("Unable to deserialize message: {e}"),
         }
     }
 }

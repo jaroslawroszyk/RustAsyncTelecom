@@ -11,19 +11,19 @@ pub async fn state_heartbeat_req(
     redis_state_manager: &mut RedisStateManager,
     identity: &[u8],
 ) -> Result<()> {
-    log::debug!("Received message: HeartbeatReq {{{msg}}}");
+    logger::debug!("Received message: HeartbeatReq {{{msg}}}");
 
     let result_redis_call = redis_state_manager.increment_counter(HEARTBEAT_NS).await;
     let response = match result_redis_call {
         Ok(_) => {
-            log::debug!(
+            logger::debug!(
                 "Counter HEARTBEAT_NS : {}",
                 redis_state_manager.get_counter(HEARTBEAT_NS).await?
             );
             build_heartbeat_response(generated::communication::Result::OK)
         }
         Err(_) => {
-            log::error!("nie udalo sie i co mi zrobisz?");
+            logger::error!("nie udalo sie i co mi zrobisz?");
             build_heartbeat_response(generated::communication::Result::ERR)
         }
     };

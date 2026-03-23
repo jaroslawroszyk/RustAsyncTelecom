@@ -19,7 +19,7 @@ pub async fn initialize_client(socket: &zmq::Socket) -> Result<(), InitalizeClie
             dotenv!("IP_ADDRESS")
         )));
     } else {
-        log::info!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
+        logger::info!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
     }
 
     Ok(())

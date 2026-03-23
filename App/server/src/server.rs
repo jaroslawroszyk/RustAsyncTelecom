@@ -35,7 +35,7 @@ impl Server {
         let socket = self.context.socket(zmq::ROUTER)?;
         assert!(socket.bind(&self.socket_address).is_ok());
 
-        log::info!("Server is running and waiting for messages...");
+        logger::info!("Server is running and waiting for messages...");
         let mut redis_state_manager = self.redis_state_manager.clone();
 
         run_state_machine(&socket, &mut redis_state_manager).await?;

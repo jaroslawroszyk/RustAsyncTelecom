@@ -14,14 +14,14 @@ pub async fn handle_system_time_response(socket: &zmq::Socket) -> Result<(), Res
         match Envelope::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
                 Some(envelope::Msgtype::SystemTimeResp(_)) => {
-                    log::debug!("Received SystemTimeResponse from the server {{{msg}}}");
+                    logger::debug!("Received SystemTimeResponse from the server {{{msg}}}");
                 }
                 _ => {
-                    log::info!("Received unexpected response: {:?}", msg);
+                    logger::info!("Received unexpected response: {:?}", msg);
                 }
             },
             Err(e) => {
-                log::info!("Unable to deserialize response: {:?}", e);
+                logger::info!("Unable to deserialize response: {:?}", e);
                 return Err(ResponseError::SystemTimeResponseError);
             }
         }

@@ -11,7 +11,7 @@ async_zmq = { workspace = true }
 chrono = { workspace = true }
 dotenv_codegen = { workspace = true }
 generated = { workspace = true }
-log = { workspace = true }
+logger = { workspace = true }
 protobuf = { workspace = true }
 redis_manager = { workspace = true }
 tokio = { workspace = true }

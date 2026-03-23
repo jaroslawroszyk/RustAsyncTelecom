@@ -11,7 +11,7 @@ pub async fn state_user_info_req(
     redis_state_manager: &mut RedisStateManager,
     identity: &[u8],
 ) -> Result<()> {
-    log::debug!("Received message: UserInfoRequest {{{msg}}}");
+    logger::debug!("Received message: UserInfoRequest {{{msg}}}");
     let username_from_db = redis_state_manager
         .get(USERS_NS, &msg.user_id.to_string())
         .await;

@@ -10,7 +10,7 @@ async fn run_server() -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    log::init()?;
+    logger::init()?;
     run_server().await?;
     Ok(())
 }

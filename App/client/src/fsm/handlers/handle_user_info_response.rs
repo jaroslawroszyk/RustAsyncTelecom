@@ -14,14 +14,14 @@ pub async fn handle_user_info_response(socket: &zmq::Socket) -> Result<(), Respo
         match Envelope::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
                 Some(envelope::Msgtype::UserInfoResponse(_)) => {
-                    log::debug!("Received UserInfoResponse from the server {{{msg}}}");
+                    logger::debug!("Received UserInfoResponse from the server {{{msg}}}");
                 }
                 _ => {
-                    log::warn!("Received unexpected response: {:?}", msg);
+                    logger::warn!("Received unexpected response: {:?}", msg);
                 }
             },
             Err(e) => {
-                log::info!("Unable to deserialize response: {:?}", e);
+                logger::info!("Unable to deserialize response: {:?}", e);
                 return Err(ResponseError::UserInfoResponseError);
             }
         }

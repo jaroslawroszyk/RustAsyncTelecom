@@ -11,7 +11,7 @@ pub async fn state_add_user_req(
     redis_state_manager: &mut RedisStateManager,
     identity: &[u8],
 ) -> Result<()> {
-    log::debug!("Received message: AddUserRequest {{{msg}}}");
+    logger::debug!("Received message: AddUserRequest {{{msg}}}");
 
     _ = send(
         socket,
@@ -23,7 +23,7 @@ pub async fn state_add_user_req(
         .set(USERS_NS, &msg.user_id.to_string(), &msg.user_name)
         .await?;
 
-    log::debug!(
+    logger::debug!(
         "Value for userId: {} is: {}",
         msg.user_id,
         redis_state_manager

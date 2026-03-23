@@ -11,9 +11,9 @@ pub async fn state_delete_user_req(
     redis_state_manager: &mut RedisStateManager,
     identity: &[u8],
 ) -> Result<()> {
-    log::debug!("Received message: DeleteUserRequest {{{msg}}}");
+    logger::debug!("Received message: DeleteUserRequest {{{msg}}}");
 
-    log::debug!(
+    logger::debug!(
         "DB STATE before remove user: {} name: {:?}",
         msg.user_id,
         redis_state_manager.get_all_from_ns(USERS_NS).await?
@@ -30,7 +30,7 @@ pub async fn state_delete_user_req(
     let response = match result_reids_call {
         Ok(_) => {
             let user_name = get_from_redis?;
-            log::debug!(
+            logger::debug!(
                 "Delete user: {} name :{} from db",
                 delete_user_id,
                 user_name
@@ -38,14 +38,14 @@ pub async fn state_delete_user_req(
             build_delete_user_response(msg, &user_name, generated::communication::Result::OK)
         }
         Err(_) => {
-            log::error!("nie udalo sie i co mi zrobisz?");
+            logger::error!("nie udalo sie i co mi zrobisz?");
             build_delete_user_response(msg, "NULL", generated::communication::Result::ERR)
         }
     };
 
     _ = send(socket, response, identity);
 
-    log::debug!(
+    logger::debug!(
         "Db state after REMOVE user: {} name: {:?}",
         msg.user_id,
         redis_state_manager.get_all_from_ns(USERS_NS).await?

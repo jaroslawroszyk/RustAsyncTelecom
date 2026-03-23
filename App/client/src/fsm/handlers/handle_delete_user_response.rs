@@ -14,14 +14,14 @@ pub async fn handle_delete_user_response(socket: &zmq::Socket) -> Result<(), Res
         match Envelope::parse_from_bytes(&resp) {
             Ok(msg) => match msg.msgtype {
                 Some(envelope::Msgtype::DeleteUserResponse(resp)) => {
-                    log::debug!("Received DeleteUserResponse from the server {{{resp}}}");
+                    logger::debug!("Received DeleteUserResponse from the server {{{resp}}}");
                 }
                 _ => {
-                    log::warn!("Received unexpected response: {:?}", msg);
+                    logger::warn!("Received unexpected response: {:?}", msg);
                 }
             },
             Err(e) => {
-                log::warn!("Unable to deserialize response: {:?}", e);
+                logger::warn!("Unable to deserialize response: {:?}", e);
                 return Err(ResponseError::DeleteUserResponseError);
             }
         }
