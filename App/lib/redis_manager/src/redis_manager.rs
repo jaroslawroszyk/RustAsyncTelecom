@@ -19,7 +19,7 @@ impl RedisStateManager {
 
     pub async fn set(&mut self, namespace: &str, key: &str, value: &str) -> Result<()> {
         let mut con = self.client.get_connection()?;
-        con.hset(namespace, key, value)?;
+        let _: () = con.hset(namespace, key, value)?;
         Ok(())
     }
 
@@ -37,7 +37,7 @@ impl RedisStateManager {
 
     pub async fn delete(&mut self, namespace: &str, key: &str) -> Result<()> {
         let mut con = self.client.get_connection()?;
-        con.hdel(namespace, key)?;
+        let _: () = con.hdel(namespace, key)?;
         Ok(())
     }
 
@@ -64,7 +64,7 @@ impl RedisStateManager {
 
     pub async fn set_counter(&mut self, namespace: &str, data: i32) -> Result<()> {
         let mut con = self.client.get_connection()?;
-        con.set(namespace, data)?;
+        let _: () = con.set(namespace, data)?;
         Ok(())
     }
 
@@ -79,7 +79,7 @@ impl RedisStateManager {
         let keys: Vec<String> = con.keys("*")?;
 
         for key in keys {
-            con.set(&key, 0)?;
+            let _: () = con.set(&key, 0)?;
         }
 
         Ok(())
