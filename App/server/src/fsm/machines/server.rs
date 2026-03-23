@@ -20,19 +20,19 @@ pub async fn run_state_machine(
         match Envelope::parse_from_bytes(&message) {
             Ok(msg) => match msg.msgtype {
                 Some(envelope::Msgtype::HeartbeatReq(ref msg)) => {
-                    state_heartbeat_req(&socket, msg, redis_state_manager, &identity).await?;
+                    state_heartbeat_req(socket, msg, redis_state_manager, &identity).await?;
                 }
                 Some(envelope::Msgtype::AddUserReq(ref msg)) => {
-                    state_add_user_req(&socket, msg, redis_state_manager, &identity).await?;
+                    state_add_user_req(socket, msg, redis_state_manager, &identity).await?;
                 }
                 Some(envelope::Msgtype::DeleteUserRequest(ref msg)) => {
-                    state_delete_user_req(&socket, msg, redis_state_manager, &identity).await?;
+                    state_delete_user_req(socket, msg, redis_state_manager, &identity).await?;
                 }
                 Some(envelope::Msgtype::UserInfoRequest(ref msg)) => {
-                    state_user_info_req(&socket, msg, redis_state_manager, &identity).await?;
+                    state_user_info_req(socket, msg, redis_state_manager, &identity).await?;
                 }
                 Some(envelope::Msgtype::SystemTimeReq(_)) => {
-                    state_system_time_req(&socket, &identity).await?;
+                    state_system_time_req(socket, &identity).await?;
                 }
                 _ => log::info!("Received unsupported message: {msg}"),
             },

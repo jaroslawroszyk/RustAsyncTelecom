@@ -3,7 +3,7 @@ use async_zmq::zmq::{self, POLLIN};
 use generated::communication::*;
 use protobuf::Message;
 
-use crate::fsm::exceptions::exceptions::ResponseError;
+use crate::fsm::exceptions::ResponseError;
 
 pub async fn handle_system_time_response(socket: &zmq::Socket) -> Result<(), ResponseError> {
     if socket.poll(POLLIN, 10) != Ok(0) {

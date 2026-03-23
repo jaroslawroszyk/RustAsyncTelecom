@@ -7,9 +7,9 @@ pub async fn state_system_time_req(socket: &zmq::Socket, identity: &[u8]) -> Res
     log::debug!("Received message: SystemTimeRequest");
 
     _ = send(
-        &socket,
+        socket,
         build_system_time_response(generated::communication::Result::OK),
-        &identity,
+        identity,
     );
     Ok(())
 }

@@ -9,7 +9,7 @@ pub fn send(socket: &zmq::Socket, msg: Envelope, identity: &[u8]) -> Result<()> 
     let serialized_msg = serialize_message(&msg);
 
     let result = socket
-        .send(&identity, SNDMORE)
+        .send(identity, SNDMORE)
         .and_then(|_| socket.send(serialized_msg, 0));
 
     match result {

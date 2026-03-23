@@ -28,6 +28,6 @@ pub async fn state_heartbeat_req(
         }
     };
 
-    _ = send(&socket, response, &identity);
+    _ = send(socket, response, identity);
     Ok(())
 }

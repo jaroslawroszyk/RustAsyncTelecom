@@ -14,9 +14,9 @@ pub async fn state_add_user_req(
     log::debug!("Received message: AddUserRequest {{{msg}}}");
 
     _ = send(
-        &socket,
+        socket,
         build_add_user_response(msg, generated::communication::Result::OK),
-        &identity,
+        identity,
     );
 
     redis_state_manager

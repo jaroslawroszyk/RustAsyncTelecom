@@ -4,7 +4,7 @@ use dotenv_codegen::dotenv;
 
 pub async fn handle_exit(socket: &zmq::Socket) -> Result<()> {
     log::info!("Exiting..");
-    if let Err(e) = socket.disconnect(&dotenv!("IP_ADDRESS")) {
+    if let Err(e) = socket.disconnect(dotenv!("IP_ADDRESS")) {
         log::error!("Error disconnecting socket: {:?}", e);
     }
     Ok(())

@@ -6,12 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow =  { workspace = true }
+anyhow = { workspace = true }
 async_zmq = { workspace = true }
 chrono = { workspace = true }
-dotenv_codegen =  { workspace = true }
-generated =  { workspace = true }
-log =  { workspace = true }
+dotenv_codegen = { workspace = true }
+generated = { workspace = true }
+log = { workspace = true }
 protobuf = { workspace = true }
 redis_manager = { workspace = true }
 tokio = { workspace = true }

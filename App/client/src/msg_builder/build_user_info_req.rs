@@ -11,5 +11,5 @@ pub fn build_user_info_req(user_id: u32) -> Envelope {
 }
 
 pub fn generate_messages_user_info_req(ids: Range<u32>) -> Vec<Envelope> {
-    ids.map(|id| build_user_info_req(id)).collect()
+    ids.map(build_user_info_req).collect()
 }

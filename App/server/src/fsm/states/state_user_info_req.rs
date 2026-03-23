@@ -22,6 +22,6 @@ pub async fn state_user_info_req(
             build_user_info_response("NULL".to_string(), generated::communication::Result::ERR)
         }
     };
-    _ = send(&socket, response, &identity);
+    _ = send(socket, response, identity);
     Ok(())
 }

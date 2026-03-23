@@ -43,7 +43,7 @@ pub async fn state_delete_user_req(
         }
     };
 
-    _ = send(&socket, response, &identity);
+    _ = send(socket, response, identity);
 
     log::debug!(
         "Db state after REMOVE user: {} name: {:?}",

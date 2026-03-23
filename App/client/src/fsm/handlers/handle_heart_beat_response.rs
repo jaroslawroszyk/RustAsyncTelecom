@@ -3,7 +3,7 @@ use async_zmq::zmq::{self, POLLIN};
 use generated::communication::*;
 use protobuf::Message;
 
-use crate::fsm::exceptions::exceptions::ResponseError;
+use crate::fsm::exceptions::ResponseError;
 
 pub async fn handle_heart_beat_response(socket: &zmq::Socket) -> Result<(), ResponseError> {
     let mut retries: i8 = 3;

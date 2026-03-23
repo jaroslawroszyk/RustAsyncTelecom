@@ -13,7 +13,7 @@ pub async fn initialize_client(socket: &zmq::Socket) -> Result<(), InitalizeClie
         InitalizeClientException::ConnectionFailed("Failed to set client identity".to_string())
     })?;
 
-    if let Err(_) = socket.connect(&dotenv!("IP_ADDRESS")) {
+    if socket.connect(dotenv!("IP_ADDRESS")).is_err() {
         return Err(InitalizeClientException::ConnectionFailed(format!(
             "No connection to the server at {:?}",
             dotenv!("IP_ADDRESS")
