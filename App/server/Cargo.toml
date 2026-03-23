@@ -10,12 +10,12 @@ anyhow = { workspace = true }
 async_zmq = { workspace = true }
 chrono = { workspace = true }
 dotenv_codegen = { workspace = true }
+envelope_macro = { workspace = true }
 generated = { workspace = true }
 logger = { workspace = true }
 protobuf = { workspace = true }
 redis_manager = { workspace = true }
 tokio = { workspace = true }
-envelope_macro = { workspace = true }
 
 [lints]
 workspace = true

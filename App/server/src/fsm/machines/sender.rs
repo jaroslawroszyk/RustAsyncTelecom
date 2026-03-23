@@ -1,15 +1,13 @@
 use anyhow::Result;
 use async_zmq::zmq;
-use generated::communication::Envelope;
+use generated::{communication::Envelope, ProtoSerialize};
 use zmq::SNDMORE;
-
-use crate::serializers::serialize_message;
 
 /// Sends a protobuf message to the client via the provided ZMQ socket.
 /// # Errors
 /// This function will return an error if the message cannot be serialized or if the send operation fails
 pub async fn send(socket: &zmq::Socket, msg: Envelope, identity: &[u8]) -> Result<()> {
-    let serialized_msg = serialize_message(&msg)?;
+    let serialized_msg = msg.serialize();
 
     let result = socket
         .send(identity, SNDMORE)

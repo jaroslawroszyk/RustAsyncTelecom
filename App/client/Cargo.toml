@@ -9,13 +9,13 @@ edition = "2021"
 anyhow = { workspace = true }
 async_zmq = { workspace = true }
 dotenv_codegen = { workspace = true }
+envelope_macro = { workspace = true }
 generated = { workspace = true }
 logger = { workspace = true }
 protobuf = { workspace = true }
 rand = { workspace = true }
-tokio = { workspace = true }
 thiserror = { workspace = true }
-envelope_macro = { workspace = true }
+tokio = { workspace = true }
 
 [lints]
 workspace = true

@@ -1,5 +1,5 @@
-use generated::communication::Envelope;
 use envelope_macro::envelope_builder;
+use generated::communication::Envelope;
 
 #[must_use]
 #[envelope_builder(mut_delete_user_request)]
