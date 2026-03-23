@@ -1,6 +1,3 @@
-use anyhow::Result;
-use async_zmq::zmq;
-use rand::Rng;
 use crate::fsm::handlers::{
     handle_add_user_response, handle_delete_user_response, handle_exit, handle_heart_beat_response,
     handle_system_time_response, handle_user_info_response,
@@ -11,6 +8,9 @@ use crate::msg_builder::{
     build_delete_user_req, build_heartbeat_req_message, build_system_time_req,
     generate_messages_add_user_req, generate_messages_user_info_req,
 };
+use anyhow::Result;
+use async_zmq::zmq;
+use rand::Rng;
 
 pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
     let mut state = State::Initializing;

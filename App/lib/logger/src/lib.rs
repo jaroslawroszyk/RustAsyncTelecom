@@ -1,11 +1,11 @@
 use anyhow::Result;
 use dotenv_codegen::dotenv;
+pub use log;
 pub use log::Level;
 use simplelog::*;
 use std::fmt;
 use std::panic::Location;
 use std::thread;
-pub use log; 
 
 const WORKDIR: &str = dotenv!("WORKDIR");
 const TERM_FILTER: &str = dotenv!("TERM_LOG_LEVEL_FILTER");
@@ -71,7 +71,7 @@ pub fn log_internal(level: log::Level, loc: &Location, args: fmt::Arguments) {
         THREAD_HEX_ID.with(|id| {
             let file_path = loc.file();
             let file_name = file_path.rsplit('/').next().unwrap_or(file_path);
-            
+
             match level {
                 log::Level::Error => log::error!("({id}) {args}"),
                 log::Level::Warn => log::warn!("({id}) {args}"),
@@ -87,8 +87,8 @@ pub fn log_internal(level: log::Level, loc: &Location, args: fmt::Arguments) {
 macro_rules! info {
     ($($arg:tt)+) => {
         $crate::log_internal(
-            $crate::log::Level::Info, 
-            std::panic::Location::caller(), 
+            $crate::log::Level::Info,
+            std::panic::Location::caller(),
             format_args!($($arg)+)
         )
     };

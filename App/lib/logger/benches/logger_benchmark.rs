@@ -6,7 +6,11 @@ fn bench_logging_disabled(c: &mut Criterion) {
 
     c.bench_function("disabled_trace_macro", |b| {
         b.iter(|| {
-            trace!("Expensive format: {} {:?}", black_box(123), black_box(vec![1,2,3]));
+            trace!(
+                "Expensive format: {} {:?}",
+                black_box(123),
+                black_box(vec![1, 2, 3])
+            );
         })
     });
 }
