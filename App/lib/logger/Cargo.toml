@@ -16,3 +16,6 @@ criterion = { workspace = true }
 [[bench]]
 name = "logger_benchmark"
 harness = false
+
+[lints]
+workspace = true

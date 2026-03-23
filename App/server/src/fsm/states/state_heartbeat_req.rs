@@ -1,10 +1,13 @@
+use crate::{builder::build_heartbeat_response, fsm::machines::send};
 use anyhow::Result;
 use async_zmq::zmq;
 use generated::communication::HeartbeatReq;
 use redis_manager::{namespace::HEARTBEAT_NS, RedisStateManager};
 
-use crate::{builder::build_heartbeat_response, fsm::machines::send};
-
+/// Handles the `HeartbeatReq` message received from the client.
+/// It increments a heartbeat counter in the Redis database and sends back a response indicating success or failure
+/// # Errors
+/// This function will return an error if it fails to increment the heartbeat counter in the Redis database or if it fails to send the response back to the client.
 pub async fn state_heartbeat_req(
     socket: &zmq::Socket,
     msg: &HeartbeatReq,
@@ -13,21 +16,22 @@ pub async fn state_heartbeat_req(
 ) -> Result<()> {
     logger::debug!("Received message: HeartbeatReq {{{msg}}}");
 
-    let result_redis_call = redis_state_manager.increment_counter(HEARTBEAT_NS).await;
-    let response = match result_redis_call {
-        Ok(_) => {
-            logger::debug!(
-                "Counter HEARTBEAT_NS : {}",
-                redis_state_manager.get_counter(HEARTBEAT_NS).await?
-            );
-            build_heartbeat_response(generated::communication::Result::OK)
-        }
-        Err(_) => {
-            logger::error!("nie udalo sie i co mi zrobisz?");
-            build_heartbeat_response(generated::communication::Result::ERR)
-        }
+    let response = if redis_state_manager
+        .increment_counter(HEARTBEAT_NS)
+        .await
+        .is_ok()
+    {
+        let current = redis_state_manager.get_counter(HEARTBEAT_NS).await?;
+        logger::debug!("Counter HEARTBEAT_NS : {current}");
+
+        build_heartbeat_response(generated::communication::Result::OK)
+    } else {
+        logger::error!("Redis increment failed for heartbeat");
+        build_heartbeat_response(generated::communication::Result::ERR)
     };
 
-    _ = send(socket, response, identity);
+    // CRITICAL: You MUST await the send call, otherwise it's a "floating future"
+    send(socket, response, identity).await?;
+
     Ok(())
 }

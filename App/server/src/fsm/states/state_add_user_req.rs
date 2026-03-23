@@ -5,6 +5,12 @@ use redis_manager::{namespace::USERS_NS, RedisStateManager};
 
 use crate::{builder::build_add_user_response, fsm::machines::send};
 
+/// Handles the `AddUserReq` message received from the client.
+/// It adds a new user to the Redis database based on the user ID and user name provided
+/// in the request and sends back a response indicating success or failure.
+/// # Errors
+/// This function will return an error if it fails to add the user to the Redis database or
+/// if it fails to send the response back to the client.
 pub async fn state_add_user_req(
     socket: &zmq::Socket,
     msg: &AddUserReq,

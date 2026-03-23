@@ -10,3 +10,5 @@ path = "src/redis_manager.rs"
 anyhow = { workspace = true }
 redis = { workspace = true }
 
+[lints]
+workspace = true

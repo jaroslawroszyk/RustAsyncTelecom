@@ -1,5 +1,6 @@
+use generated::communication::DeleteUserRequest;
+use generated::communication::Envelope;
 use generated::communication::Result;
-use generated::communication::*;
 
 pub fn build_delete_user_response(
     delete_user_req: &DeleteUserRequest,

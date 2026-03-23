@@ -14,6 +14,10 @@ pub struct Server {
 }
 
 impl Server {
+    /// Creates a new instance of the `Server` struct, initializing the `ZeroMQ` context and setting up the socket address.
+    /// It also initializes the `RedisStateManager` to manage the server's state in Redis. The function checks if the specified port is available before proceeding.
+    /// # Errors
+    /// This function will return an error if the specified port is already in use, or if there are issues initializing the `RedisStateManager` or any other operations that may fail during the setup
     pub async fn new() -> Result<Self> {
         if !is_port_available(dotenv!("PORT")).await {
             bail!(async_zmq::Error::EADDRINUSE);
@@ -31,6 +35,12 @@ impl Server {
         })
     }
 
+    /// Starts the server, binds to the specified socket address, and runs the state machine to handle incoming messages.
+    /// The server will listen for messages from clients and process them according to the defined state machine
+    /// # Panics
+    /// This function will panic if it fails to bind to the socket address, which could happen if the address is already in use or if there are insufficient permissions.
+    /// # Errors
+    /// This function will return an error if it fails to bind to the socket address, or if any of the operations within the state machine fail, such as receiving messages, processing them, or
     pub async fn run(&self) -> Result<()> {
         let socket = self.context.socket(zmq::ROUTER)?;
         assert!(socket.bind(&self.socket_address).is_ok());

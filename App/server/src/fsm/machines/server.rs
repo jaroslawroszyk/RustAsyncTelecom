@@ -1,14 +1,17 @@
-use anyhow::Result;
-use async_zmq::zmq;
-use generated::communication::*;
-use protobuf::Message;
-use redis_manager::RedisStateManager;
-
 use crate::fsm::states::{
     state_add_user_req, state_delete_user_req, state_heartbeat_req, state_system_time_req,
     state_user_info_req,
 };
+use anyhow::Result;
+use async_zmq::zmq;
+use generated::communication::{envelope, Envelope};
+use protobuf::Message;
+use redis_manager::RedisStateManager;
 
+/// Runs the server state machine that listens for incoming messages from clients and processes them accordingly.
+/// It uses a `ZeroMQ` socket to receive messages and a `RedisStateManager` to manage the state of the server in a Redis database.
+/// # Errors
+/// This function will return an error if it fails to receive a message, deserialize it, or if it fails to process the message based on its type. It will also return an error if it fails to send a response back to the client.
 pub async fn run_state_machine(
     socket: &zmq::Socket,
     redis_state_manager: &mut RedisStateManager,

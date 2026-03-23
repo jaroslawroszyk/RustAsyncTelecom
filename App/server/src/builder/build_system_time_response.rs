@@ -1,7 +1,8 @@
 use chrono::Local;
+use generated::communication::Envelope;
 use generated::communication::Result;
-use generated::communication::*;
 
+#[must_use]
 pub fn build_system_time_response(result: Result) -> Envelope {
     let mut msg = Envelope::new();
     let req = msg.mut_system_time_resp();

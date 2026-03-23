@@ -2,7 +2,10 @@ use anyhow::Result;
 use dotenv_codegen::dotenv;
 pub use log;
 pub use log::Level;
-use simplelog::*;
+use simplelog::{
+    ColorChoice, CombinedLogger, ConfigBuilder, LevelFilter, LevelPadding, TermLogger,
+    TerminalMode, WriteLogger,
+};
 use std::fmt;
 use std::panic::Location;
 use std::thread;
@@ -19,10 +22,18 @@ thread_local! {
             .collect::<String>()
             .parse()
             .unwrap_or(0);
-        format!("{:04x}", id_num)
+        format!("{id_num:04x}")
     };
 }
 
+/// Initializes the logging system for the application.
+/// It sets up both terminal and file logging with configurable log levels.
+/// The log files are stored in the `artifacts` directory with a timestamped filename.
+/// The log format includes the thread ID, log level, and optionally the file name and line
+/// number for debug and trace levels. The log levels can be configured through environment variables.
+/// # Errors
+/// This function may return an error if there is an issue creating the log file or initializing the
+/// logging system
 pub fn init() -> Result<()> {
     let date = chrono::Local::now().format("%Y%m%d%H");
     let path = format!("{WORKDIR}/artifacts/{date}.log");

@@ -4,7 +4,7 @@ resolver = "2"
 
 [workspace.lints.clippy]
 enum_glob_use = "deny"
-missing_panics_docs = "deny"
+missing_panics_doc = "deny"
 unused_imports = "deny"
 pedantic = "deny"
 panic = "deny"

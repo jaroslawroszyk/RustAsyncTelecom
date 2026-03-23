@@ -14,3 +14,6 @@ logger = { workspace = true }
 protobuf = { workspace = true }
 rand = { workspace = true }
 tokio = { workspace = true }
+
+[lints]
+workspace = true

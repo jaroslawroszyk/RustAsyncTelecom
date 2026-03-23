@@ -1,5 +1,6 @@
-use generated::communication::*;
+use generated::communication::Envelope;
 
+#[must_use]
 pub fn build_delete_user_req(id: u32) -> Envelope {
     let mut msg = Envelope::new();
     let req = msg.mut_delete_user_request();

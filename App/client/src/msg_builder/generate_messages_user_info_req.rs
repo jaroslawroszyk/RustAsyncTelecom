@@ -1,6 +1,7 @@
-use generated::communication::*;
+use generated::communication::Envelope;
 use std::ops::Range;
 
+#[must_use]
 pub fn build_user_info_req(user_id: u32) -> Envelope {
     let mut msg = Envelope::new();
     let req = msg.mut_user_info_request();

@@ -12,6 +12,12 @@ use anyhow::Result;
 use async_zmq::zmq;
 use rand::Rng;
 
+/// Runs the client's finite state machine, managing the communication flow with the server.
+/// The client goes through several states, including initialization, sending requests, and handling responses.
+/// The state machine handles various types of requests such as heartbeat, adding users, deleting users,
+/// and requesting user information, as well as system time requests. The client will exit gracefully upon completion or in case of errors.
+/// # Errors
+/// This function will return an error if any of the operations within the state machine fail, such as sending messages, receiving responses, or processing the responses.
 pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
     let mut state = State::Initializing;
     let user_ids = 1..5;
@@ -23,7 +29,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
     loop {
         match state {
             State::Initializing => match initialize_client(socket).await {
-                Ok(_) => state = State::SendingHeartbeatReq,
+                Ok(()) => state = State::SendingHeartbeatReq,
                 Err(e) => {
                     logger::error!("{:?}", e);
                     state = State::Exit;
@@ -34,7 +40,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 state = State::WaitForHeartBeatResponse;
             }
             State::WaitForHeartBeatResponse => match handle_heart_beat_response(socket).await {
-                Ok(_) => state = State::SendingAddUserReq,
+                Ok(()) => state = State::SendingAddUserReq,
                 Err(e) => {
                     logger::error!("{:?}", e);
                     state = State::Exit;
@@ -52,7 +58,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 }
             }
             State::WaitForAddUserResponse => match handle_add_user_response(socket).await {
-                Ok(_) => state = State::SendingAddUserReq,
+                Ok(()) => state = State::SendingAddUserReq,
                 Err(e) => {
                     logger::error!("{:?}", e);
                     state = State::Exit;
@@ -66,7 +72,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 state = State::WaitForDeleteUserResponse;
             }
             State::WaitForDeleteUserResponse => match handle_delete_user_response(socket).await {
-                Ok(_) => state = State::SendingUserInfoRequest,
+                Ok(()) => state = State::SendingUserInfoRequest,
                 Err(e) => {
                     logger::error!("{:?}", e);
                     state = State::Exit;
@@ -84,7 +90,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 }
             }
             State::WaitForUserInfoResponse => match handle_user_info_response(socket).await {
-                Ok(_) => state = State::SendingUserInfoRequest,
+                Ok(()) => state = State::SendingUserInfoRequest,
                 Err(e) => {
                     logger::error!("{:?}", e);
                     state = State::Exit;
@@ -95,7 +101,7 @@ pub async fn run_state_machine(socket: &zmq::Socket) -> Result<()> {
                 state = State::WaitForSystemTimeResp;
             }
             State::WaitForSystemTimeResp => match handle_system_time_response(socket).await {
-                Ok(_) => state = State::Exit,
+                Ok(()) => state = State::Exit,
                 Err(e) => {
                     logger::error!("{:?}", e);
                     state = State::Exit;

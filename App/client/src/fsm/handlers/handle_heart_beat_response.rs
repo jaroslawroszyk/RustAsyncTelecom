@@ -1,10 +1,15 @@
 use anyhow::Result;
 use async_zmq::zmq::{self, POLLIN};
-use generated::communication::*;
+use generated::communication::{envelope, Envelope};
 use protobuf::Message;
 
 use crate::fsm::exceptions::ResponseError;
 
+/// Handles the response for the Heartbeat request sent to the server.
+/// It listens for a response on the provided `ZeroMQ` socket and processes it accordingly.
+/// The function will retry up to 3 times if it does not receive a response within the specified timeout.
+/// # Errors
+/// This function will return an error if it fails to receive a response, deserialize it, or if the response is not of the expected type after exhausting all retries.
 pub async fn handle_heart_beat_response(socket: &zmq::Socket) -> Result<(), ResponseError> {
     let mut retries: i8 = 3;
 

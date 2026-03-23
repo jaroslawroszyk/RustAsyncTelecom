@@ -5,6 +5,13 @@ use rand::Rng;
 
 use crate::fsm::exceptions::initialize_client_exception::InitalizeClientException;
 
+/// Initializes the client by setting a unique identity and connecting to the server.
+/// # Arguments
+/// * `socket` - A reference to the `ZeroMQ` socket used for communication with the server
+/// # Returns
+/// A Result indicating the success or failure of the initialization process.
+/// # Errors
+/// This function will return an error if the client fails to set its identity or connect to the server.
 pub async fn initialize_client(socket: &zmq::Socket) -> Result<(), InitalizeClientException> {
     let mut rng = rand::thread_rng();
     let client_id: String = rng.gen_range(1000..9999).to_string();
@@ -18,9 +25,8 @@ pub async fn initialize_client(socket: &zmq::Socket) -> Result<(), InitalizeClie
             "No connection to the server at {:?}",
             dotenv!("IP_ADDRESS")
         )));
-    } else {
-        logger::info!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
     }
+    logger::info!("Connected to the server at {:?}", dotenv!("IP_ADDRESS"));
 
     Ok(())
 }

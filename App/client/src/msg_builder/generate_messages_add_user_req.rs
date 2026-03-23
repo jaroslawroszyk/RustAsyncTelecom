@@ -1,6 +1,5 @@
+use generated::communication::{AddUserReq, Envelope};
 use std::ops::Range;
-
-use generated::communication::*;
 
 fn build_message_add_user_req(user_id: u32, user_name: &str) -> Envelope {
     let mut msg = Envelope::new();
@@ -12,6 +11,7 @@ fn build_message_add_user_req(user_id: u32, user_name: &str) -> Envelope {
     msg
 }
 
+#[must_use]
 pub fn generate_messages_add_user_req(ids: Range<u32>) -> Vec<Envelope> {
     let user_names = vec![
         "Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Henry", "Ivy", "Jack",

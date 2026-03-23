@@ -1,11 +1,12 @@
-use generated::communication::*;
+use generated::communication::{Envelope, Result as ProtoResult}; // Zmiana nazwy przy imporcie
 
-pub fn build_user_info_response(username: String, result: Result) -> Envelope {
+#[must_use]
+pub fn build_user_info_response(username: String, result: ProtoResult) -> Envelope {
     let mut msg = Envelope::new();
-    let req = msg.mut_user_info_response();
+    let resp = msg.mut_user_info_response();
 
-    req.username = username;
-    req.result = result.into();
+    resp.username = username;
+    resp.result = result.into();
 
     msg
 }

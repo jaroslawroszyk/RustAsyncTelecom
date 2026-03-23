@@ -15,3 +15,6 @@ logger = { workspace = true }
 protobuf = { workspace = true }
 redis_manager = { workspace = true }
 tokio = { workspace = true }
+
+[lints]
+workspace = true
