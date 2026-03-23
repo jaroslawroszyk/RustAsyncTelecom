@@ -6,14 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async_zmq = "0.4.0"
-protobuf = "3.2.0"
-tokio = { version = "1", features = ["full"] }
-generated = { path = "../generated" }
-anyhow = "1.0.79"
-dotenv_codegen = "0.15.0"
-dotenv = "0.15.0"
-log = { path = "../lib/logger" }
-redis_manager = { path = "../lib/redis_manager" }
-chrono = "0.4.34"
-redis = "0.24.0"
+anyhow =  { workspace = true }
+async_zmq = { workspace = true }
+chrono = { workspace = true }
+dotenv_codegen =  { workspace = true }
+generated =  { workspace = true }
+log =  { workspace = true }
+protobuf = { workspace = true }
+redis_manager = { workspace = true }
+tokio = { workspace = true }

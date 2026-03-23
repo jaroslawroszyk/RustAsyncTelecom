@@ -1,8 +1,21 @@
 [workspace]
+members = ["client", "generated", "lib/logger", "lib/redis_manager", "server"]
 resolver = "2"
 
-members = [
-    "client",
-    "server",
-    "lib/*"
-]
+[workspace.lints.rust]
+unused_imports = "warn"
+
+[workspace.dependencies]
+anyhow = "1.0.79"
+async_zmq = "0.4.0"
+chrono = "0.4.34"
+dotenv = "0.15.0"
+dotenv_codegen = "0.15.0"
+generated = { path = "generated" }
+log = { path = "lib/logger" }
+protobuf = "3.2.0"
+protobuf-codegen = "3.2.0"
+rand = "0.8"
+redis = "0.24.0"
+tokio = { version = "1", features = ["full"] }
+redis_manager = { path = "lib/redis_manager" }

@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-path="src/redis_manager.rs"
+path = "src/redis_manager.rs"
 
 [dependencies]
-redis = "0.24.0"
-anyhow = "1.0.79"
+anyhow = { workspace = true }
+redis = { workspace = true }
 
