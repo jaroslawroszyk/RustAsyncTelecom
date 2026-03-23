@@ -2,17 +2,20 @@
 members = ["client", "generated", "lib/logger", "lib/redis_manager", "server"]
 resolver = "2"
 
-[workspace.lints.rust]
-unused_imports = "warn"
-unwrap_used = "warn"
-await_holding_lock = "warn"
-perf = "warn"
-pedantic = { level = "warn", priority = -1 }
+[workspace.lints.clippy]
+enum_glob_use = "deny"
+missing_panics_docs = "deny"
+unused_imports = "deny"
+pedantic = "deny"
+panic = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
 
 [workspace.dependencies]
 anyhow = "1.0.79"
 async_zmq = "0.4.0"
 chrono = "0.4.34"
+criterion = "0.5"
 dotenv = "0.15.0"
 dotenv_codegen = "0.15.0"
 generated = { path = "generated" }
@@ -22,6 +25,5 @@ protobuf-codegen = "3.2.0"
 rand = "0.8"
 redis = "0.24.0"
 redis_manager = { path = "lib/redis_manager" }
-tokio = { version = "1", features = ["full"] }
-criterion = "0.5"
 simplelog = { version = "0.12.1", features = ["termcolor"] }
+tokio = { version = "1", features = ["full"] }
