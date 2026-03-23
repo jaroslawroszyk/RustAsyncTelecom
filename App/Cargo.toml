@@ -1,5 +1,5 @@
 [workspace]
-members = ["client", "generated", "lib/logger", "lib/redis_manager", "server"]
+members = ["client", "generated", "lib/logger", "lib/redis_manager", "lib/envelope_macro", "server"]
 resolver = "2"
 
 [workspace.lints.clippy]
@@ -28,3 +28,4 @@ redis_manager = { path = "lib/redis_manager" }
 simplelog = { version = "0.12.1", features = ["termcolor"] }
 tokio = { version = "1", features = ["full"] }
 thiserror = "2.0.18"
+envelope_macro = { path = "lib/envelope_macro"}

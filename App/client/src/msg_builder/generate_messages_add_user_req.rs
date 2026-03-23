@@ -1,14 +1,11 @@
-use generated::communication::{AddUserReq, Envelope};
+use envelope_macro::envelope_builder;
+use generated::communication::Envelope;
 use std::ops::Range;
 
+#[envelope_builder(mut_add_user_req)]
 fn build_message_add_user_req(user_id: u32, user_name: &str) -> Envelope {
-    let mut msg = Envelope::new();
-    let req: &mut AddUserReq = msg.mut_add_user_req();
-
-    req.user_id = user_id;
-    req.user_name = user_name.to_string();
-
-    msg
+    inner.user_id = user_id;
+    inner.user_name = user_name.to_string();
 }
 
 #[must_use]

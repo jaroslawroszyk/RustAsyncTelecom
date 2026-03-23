@@ -1,14 +1,11 @@
 use generated::communication::AddUserReq;
 use generated::communication::Envelope;
 use generated::communication::Result;
+use envelope_macro::envelope_builder;
 
+#[envelope_builder(mut_add_user_resp)]
 pub fn build_add_user_response(add_user_req: &AddUserReq, result: Result) -> Envelope {
-    let mut msg = Envelope::new();
-    let req = msg.mut_add_user_resp();
-
-    req.user_id = add_user_req.user_id;
-    req.user_name = format!("OK RECEIVED for {}", add_user_req.user_name);
-    req.result = result.into();
-
-    msg
+    inner.user_id = add_user_req.user_id;
+    inner.user_name = format!("OK RECEIVED for {}", add_user_req.user_name);
+    inner.result = result.into();
 }

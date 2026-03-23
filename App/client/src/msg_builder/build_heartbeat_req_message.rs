@@ -1,11 +1,8 @@
+use envelope_macro::envelope_builder;
 use generated::communication::Envelope;
 
 #[must_use]
+#[envelope_builder(mut_HeartbeatReq)]
 pub fn build_heartbeat_req_message() -> Envelope {
-    let mut msg = Envelope::new();
-    let req = msg.mut_HeartbeatReq();
-
-    req.message = "HEARTBEAT PING".into();
-
-    msg
+    inner.message = "HEARTBEAT PING".into();
 }
