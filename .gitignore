@@ -1,5 +1,10 @@
-.DS_Store
-zmqTest/target/
-Cargo.lock
-zmqTest/Cargo.lock
-PlayGround/
+target/
+**/*.rs.bk
+
+**/artifacts/*.log
+server/artifacts/
+
+!.env.example
+
+.vscode/
+.idea/
