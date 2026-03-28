@@ -201,6 +201,7 @@ dependencies = [
  "rand",
  "thiserror 2.0.18",
  "tokio",
+ "zmq_handler_macro",
 ]
 
 [[package]]
@@ -2135,4 +2136,13 @@ dependencies = [
  "libc",
  "system-deps",
  "zeromq-src",
+]
+
+[[package]]
+name = "zmq_handler_macro"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.117",
 ]

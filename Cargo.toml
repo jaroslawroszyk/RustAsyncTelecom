@@ -5,6 +5,7 @@ members = [
     "lib/envelope_macro",
     "lib/logger",
     "lib/redis_manager",
+    "lib/zmq_handler_macro",
     "server",
 ]
 resolver = "2"
@@ -36,3 +37,4 @@ redis_manager = { path = "lib/redis_manager" }
 simplelog = { version = "0.12.1", features = ["termcolor"] }
 thiserror = "2.0.18"
 tokio = { version = "1", features = ["full"] }
+zmq_handler_macro = { path = "lib/zmq_handler_macro" }
