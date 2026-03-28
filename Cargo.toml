@@ -14,7 +14,6 @@ resolver = "2"
 [workspace.lints.clippy]
 enum_glob_use = "deny"
 missing_panics_doc = "deny"
-unused_imports = "deny"
 pedantic = "deny"
 panic = "deny"
 unwrap_used = "deny"
@@ -33,7 +32,7 @@ logger = { path = "lib/logger" }
 protobuf = "3.2.0"
 protobuf-codegen = "3.2.0"
 rand = "0.8"
-redis = "0.24.0"
+redis = "1.1.0"
 redis_manager = { path = "lib/redis_manager" }
 simplelog = { version = "0.12.1", features = ["termcolor"] }
 thiserror = "2.0.18"
