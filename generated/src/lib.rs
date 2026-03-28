@@ -3,9 +3,11 @@ pub mod communication;
 use protobuf::Message;
 
 pub trait ProtoSerialize: Message {
-    fn serialize(&self) -> Vec<u8> {
+    /// Serializes the protobuf message into bytes.
+    /// # Errors
+    /// Returns `protobuf::Error` if serialization fails.
+    fn serialize(&self) -> Result<Vec<u8>, protobuf::Error> {
         self.write_to_bytes()
-            .expect("Failed to serialize protobuf message")
     }
 }
 

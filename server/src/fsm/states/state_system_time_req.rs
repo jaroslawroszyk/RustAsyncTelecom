@@ -10,10 +10,11 @@ use crate::{builder::build_system_time_response, fsm::machines::send};
 pub async fn state_system_time_req(socket: &zmq::Socket, identity: &[u8]) -> Result<()> {
     logger::debug!("Received message: SystemTimeRequest");
 
-    _ = send(
+    send(
         socket,
         build_system_time_response(generated::communication::Result::OK),
         identity,
-    );
+    )
+    .await?;
     Ok(())
 }

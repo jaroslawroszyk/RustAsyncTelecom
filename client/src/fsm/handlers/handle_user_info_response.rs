@@ -9,6 +9,6 @@ use crate::fsm::exceptions::ResponseError;
 #[zmq_response_handler(
     variant = UserInfoResponse,
     error = UserInfoResponseError,
-    poll_timeout_ms = 10,
+    poll_timeout_ms = 5000,
 )]
 pub async fn handle_user_info_response(socket: &zmq::Socket) -> Result<(), ResponseError> {}

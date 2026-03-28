@@ -36,14 +36,12 @@ impl Server {
     }
 
     /// Starts the server, binds to the specified socket address, and runs the state machine to handle incoming messages.
-    /// The server will listen for messages from clients and process them according to the defined state machine
-    /// # Panics
-    /// This function will panic if it fails to bind to the socket address, which could happen if the address is already in use or if there are insufficient permissions.
+    /// The server will listen for messages from clients and process them according to the defined state machine.
     /// # Errors
-    /// This function will return an error if it fails to bind to the socket address, or if any of the operations within the state machine fail, such as receiving messages, processing them, or
+    /// This function will return an error if it fails to bind to the socket address, or if any of the operations within the state machine fail, such as receiving messages, processing them, or sending responses.
     pub async fn run(&self) -> Result<()> {
         let socket = self.context.socket(zmq::ROUTER)?;
-        assert!(socket.bind(&self.socket_address).is_ok());
+        socket.bind(&self.socket_address)?;
 
         logger::info!("Server is running and waiting for messages...");
         let mut redis_state_manager = self.redis_state_manager.clone();

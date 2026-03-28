@@ -17,6 +17,7 @@ rand = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 zmq_handler_macro = { workspace = true }
+zmq_sender = { workspace = true }
 
 [lints]
 workspace = true

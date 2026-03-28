@@ -202,6 +202,7 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "zmq_handler_macro",
+ "zmq_sender",
 ]
 
 [[package]]
@@ -1364,6 +1365,7 @@ dependencies = [
  "protobuf",
  "redis_manager",
  "tokio",
+ "zmq_sender",
 ]
 
 [[package]]
@@ -2145,4 +2147,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.117",
+]
+
+[[package]]
+name = "zmq_sender"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async_zmq",
+ "generated",
+ "logger",
 ]

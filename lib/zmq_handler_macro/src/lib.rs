@@ -136,36 +136,39 @@ pub fn zmq_response_handler(attr: TokenStream, item: TokenStream) -> TokenStream
                 logger::info!("Number of retries left: {}", retries_left);
             }
 
-            Ok(())
+            Err(ResponseError::#error)
         })
     } else {
         syn::parse_quote!({
-            if #socket_ident.poll(::async_zmq::zmq::POLLIN, #poll_timeout) != Ok(0) {
-                let Ok(resp) = #socket_ident.recv_msg(0) else {
-                    return Err(ResponseError::#error);
-                };
-
-                match <::generated::communication::Envelope
-                    as ::protobuf::Message>::parse_from_bytes(&resp)
-                {
-                    Ok(msg) => match msg.msgtype {
-                        Some(
-                            ::generated::communication::envelope::Msgtype::#variant(_),
-                        ) => {
-                            logger::debug!(#log_msg, msg);
-                        }
-                        _ => {
-                            logger::warn!("Received unexpected response: {:?}", msg);
-                        }
-                    },
-                    Err(e) => {
-                        logger::warn!("Unable to deserialize response: {:?}", e);
-                        return Err(ResponseError::#error);
-                    }
-                }
+            if #socket_ident.poll(::async_zmq::zmq::POLLIN, #poll_timeout) == Ok(0) {
+                logger::warn!("Poll timeout — no response from server");
+                return Err(ResponseError::#error);
             }
 
-            Ok(())
+            let Ok(resp) = #socket_ident.recv_msg(0) else {
+                return Err(ResponseError::#error);
+            };
+
+            match <::generated::communication::Envelope
+                as ::protobuf::Message>::parse_from_bytes(&resp)
+            {
+                Ok(msg) => match msg.msgtype {
+                    Some(
+                        ::generated::communication::envelope::Msgtype::#variant(_),
+                    ) => {
+                        logger::debug!(#log_msg, msg);
+                        Ok(())
+                    }
+                    _ => {
+                        logger::warn!("Received unexpected response: {:?}", msg);
+                        Err(ResponseError::#error)
+                    }
+                },
+                Err(e) => {
+                    logger::warn!("Unable to deserialize response: {:?}", e);
+                    Err(ResponseError::#error)
+                }
+            }
         })
     };
 

@@ -1,0 +1,13 @@
+[package]
+name = "zmq_sender"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+async_zmq = { workspace = true }
+generated = { workspace = true }
+logger = { workspace = true }
+
+[lints]
+workspace = true

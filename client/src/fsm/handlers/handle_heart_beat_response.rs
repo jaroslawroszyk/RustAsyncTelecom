@@ -6,7 +6,8 @@ use crate::fsm::exceptions::ResponseError;
 /// Handles the response for the Heartbeat request sent to the server.
 /// Retries up to 3 times if no response is received within the poll timeout.
 /// # Errors
-/// Returns `ResponseError::HeartBeatException` if the socket receive fails.
+/// Returns `ResponseError::HeartBeatException` if no valid heartbeat response
+/// is received after all retries or if the socket receive fails.
 #[zmq_response_handler(
     variant = HeartbeatResp,
     error = HeartBeatException,
